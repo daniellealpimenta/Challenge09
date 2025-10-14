@@ -12,6 +12,8 @@ import WeatherKit
 import CoreLocation
 
 struct ContentView: View {
+    @Environment(LocationManager.self) var locationManager
+    @State private var selectedCity: City?
     let weatherManager = WeatherManager.shared
     @State private var weather: Weather?
     @State private var isLoading = false
@@ -57,4 +59,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(LocationManager())
 }

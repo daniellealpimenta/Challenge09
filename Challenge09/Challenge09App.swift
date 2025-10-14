@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct Challenge09App: App {
+    @State private var locationManager = LocationManager()
     var body: some Scene {
         WindowGroup {
-            ContentView()
-        }
+            if locationManager.isAuthorized {
+                ContentView()
+            } else {
+                LocationDeniedView()
+            }
+                
+        }.environment(locationManager)
     }
 }
