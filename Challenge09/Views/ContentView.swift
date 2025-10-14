@@ -43,6 +43,7 @@ struct ContentView: View {
                         .font(.title3)
                     AttributionView()
                     Text(weatherManager.weatherDays.count.description + " dias de previsão")
+                    NotificationButton()
                     
                 }
             }
