@@ -50,23 +50,23 @@ struct ContentView: View {
                         AttributionView()
                         Text(weatherManager.weatherDays.count.description + " dias de previsão")
                         NotificationButton()
+                    }
                 }
             }
-        }
-        .padding()
+        }.padding()
         .task(id: locationManager.currentLocation) {
-            if let currentLocation = locationManager.currentLocation, selectedCity == nil {
-                selectedCity = currentLocation
+                if let currentLocation = locationManager.currentLocation, selectedCity == nil {
+                    selectedCity = currentLocation
+                }
             }
-        }
         
         .task(id: selectedCity) {
             if let selectedCity {
                 await fetchWeatherView(for: selectedCity)
             }
         }
-            
     }
+
     
     func fetchWeatherView(for city: City) async {
         isLoading = true
