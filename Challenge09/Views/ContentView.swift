@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(LocationManager.self) var locationManager
+    @State private var selectedCity: City?
     var body: some View {
         VStack {
             Image(systemName: "globe")
@@ -21,4 +23,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environment(LocationManager())
 }
