@@ -33,7 +33,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate{
     }
     
     
-    func locationManager(_ manager: CLLocationManager, didupdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         userlocation = locations.last
         if let userlocation {
             Task {

@@ -8,7 +8,7 @@
 import Foundation
 import CoreLocation
 
-struct City: Identifiable {
+struct City: Identifiable, Hashable {
     var id = UUID()
     var name: String
     var latitude: Double
