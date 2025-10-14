@@ -9,15 +9,20 @@ import SwiftUI
 
 @main
 struct Challenge09App: App {
-    
-    @UIApplicationDelegateAdaptor var appDelegate: PushNotificationDelegate
-    
+    @State private var locationManager = LocationManager()
+    @UIApplicationDelegateAdaptor var appDelegate: PushNotificationDelegate 
+     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .onAppear {
+            if locationManager.isAuthorized {
+                ContentView()
+                    .onAppear {
                     appDelegate.app = self
                 }
-        }
+            } else {
+                LocationDeniedView()
+            }
+                
+        }.environment(locationManager)
     }
 }

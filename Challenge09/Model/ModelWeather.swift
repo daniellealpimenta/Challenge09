@@ -10,7 +10,7 @@ import Foundation
 struct WeatherModel: Codable, Identifiable {
     var id = UUID()
     var symbolWeather: String?
-    var dateWeather: Date
+    var dateWeather: String
     var highestTemperature: Double
     var lowestTemperature: Double
     var precipitationChance: Double
@@ -21,7 +21,7 @@ struct WeatherModel: Codable, Identifiable {
     var maximumUmidity: Double
     var minimunUmidity: Double
     
-    init(symbolWeather: String? = "cloud.fill",dateWeather:Date,highestTemperature: Double, lowestTemperature: Double, precipitationChance: Double, uvIndex: Int, condition: String, astromicalDown: Date? = nil, astromicalDusk: Date? = nil, maximumUmidity: Double, minimunUmidity: Double) {
+    init(symbolWeather: String? = "cloud.fill",dateWeather:String,highestTemperature: Double, lowestTemperature: Double, precipitationChance: Double, uvIndex: Int, condition: String, astromicalDown: Date? = nil, astromicalDusk: Date? = nil, maximumUmidity: Double, minimunUmidity: Double) {
         self.symbolWeather = symbolWeather
         self.dateWeather = dateWeather
         self.highestTemperature = highestTemperature

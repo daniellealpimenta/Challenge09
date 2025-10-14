@@ -30,7 +30,7 @@ class WeatherManager {
         }.value
         if let weatherExists = weather {
             for weatherDay in weatherExists.dailyForecast {
-                let weatherDayInit = WeatherModel(symbolWeather: weatherDay.symbolName, dateWeather: weatherDay.date, highestTemperature: weatherDay.highTemperature.value, lowestTemperature: weatherDay.lowTemperature.value, precipitationChance: weatherDay.precipitationChance, uvIndex: weatherDay.uvIndex.value, condition: weatherDay.condition.rawValue, maximumUmidity: weatherDay.maximumHumidity, minimunUmidity: weatherDay.minimumHumidity)
+                let weatherDayInit = WeatherModel(symbolWeather: weatherDay.symbolName, dateWeather: weatherDay.date.formatted(date: .abbreviated, time: .omitted), highestTemperature: weatherDay.highTemperature.value, lowestTemperature: weatherDay.lowTemperature.value, precipitationChance: weatherDay.precipitationChance, uvIndex: weatherDay.uvIndex.value, condition: weatherDay.condition.rawValue, maximumUmidity: weatherDay.maximumHumidity, minimunUmidity: weatherDay.minimumHumidity)
                 
                 weatherDays.append(weatherDayInit)
             }
