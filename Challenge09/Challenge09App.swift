@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct Challenge09App: App {
+    
+    @UIApplicationDelegateAdaptor var appDelegate: PushNotificationDelegate
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    appDelegate.app = self
+                }
         }
     }
 }
