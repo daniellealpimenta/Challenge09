@@ -40,6 +40,7 @@ struct ContentView: View {
                     Text(weather.currentWeather.condition.description)
                         .font(.title3)
                     AttributionView()
+                    Text(weatherManager.weatherDays.count.description + " dias de previsão")
                 }
             }
         }

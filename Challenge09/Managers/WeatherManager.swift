@@ -12,6 +12,7 @@ import CoreLocation
 class WeatherManager {
     static let shared = WeatherManager()
     let service = WeatherService.shared
+    var weatherDays: [WeatherModel] = []
     
     var temperatureFormatter: MeasurementFormatter {
         let formatter = MeasurementFormatter()
@@ -24,8 +25,17 @@ class WeatherManager {
             let forecast = try? await self.service.weather(
                 for: location,
             )
+        
             return forecast
         }.value
+        if let weatherExists = weather {
+            for weatherDay in weatherExists.dailyForecast {
+                let weatherDayInit = WeatherModel(symbolWeather: weatherDay.symbolName, dateWeather: weatherDay.date, highestTemperature: weatherDay.highTemperature.value, lowestTemperature: weatherDay.lowTemperature.value, precipitationChance: weatherDay.precipitationChance, uvIndex: weatherDay.uvIndex.value, condition: weatherDay.condition.rawValue, maximumUmidity: weatherDay.maximumHumidity, minimunUmidity: weatherDay.minimumHumidity)
+                
+                weatherDays.append(weatherDayInit)
+            }
+        }
+        
         return weather
     }
     
