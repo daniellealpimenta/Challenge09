@@ -19,54 +19,66 @@ struct ContentView: View {
     @State private var weather: Weather?
     @State private var isLoading = false
     
+    @State var allActivities: [Activity] = []
+    
     var body: some View {
-        VStack {
-            if let selectedCity {
-                if isLoading {
-                    ProgressView()
-                    Text("Fazendo requisição do Clima...")
-                } else {
-                    Text(selectedCity.name)
-                        .font(.title)
-                        .padding()
-                    
-                    if let weather {
-                        Text(Date.now.formatted(date: .abbreviated, time: .omitted))
-                        Text(Date.now.formatted(date: .omitted, time: .shortened))
-                        Image(systemName: weather.currentWeather.symbolName)
-                            .renderingMode(.original)
-                            .symbolVariant(.fill)
-                            .font(.system(size: 60.0, weight: .bold))
+        NavigationStack {
+            VStack {
+                if let selectedCity {
+                    if isLoading {
+                        ProgressView()
+                        Text("Fazendo requisição do Clima...")
+                    } else {
+                        Text(selectedCity.name)
+                            .font(.title)
                             .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(.secondary.opacity(0.2))
-                            )
-                        let temp = weatherManager.temperatureFormatter.string(from: weather.currentWeather.temperature)
-                        Text(temp)
-                            .font(.title2)
-                        Text(weather.currentWeather.condition.description)
-                            .font(.title3)
-                        AttributionView()
-                        Text(weatherManager.weatherDays.count.description + " dias de previsão")
-                        NotificationButton()
+                        
+                        if let weather {
+                            Text(Date.now.formatted(date: .abbreviated, time: .omitted))
+                            Text(Date.now.formatted(date: .omitted, time: .shortened))
+                            Image(systemName: weather.currentWeather.symbolName)
+                                .renderingMode(.original)
+                                .symbolVariant(.fill)
+                                .font(.system(size: 60.0, weight: .bold))
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(.secondary.opacity(0.2))
+                                )
+                            let temp = weatherManager.temperatureFormatter.string(from: weather.currentWeather.temperature)
+                            Text(temp)
+                                .font(.title2)
+                            Text(weather.currentWeather.condition.description)
+                                .font(.title3)
+                            AttributionView()
+                            Text(weatherManager.weatherDays.count.description + " dias de previsão")
+                            NotificationButton()
+                        }
+                        
+                        NavigationLink(destination: AddNewActivity(allActivities: $allActivities), label: {
+                            Text("Adicionar novo rolê")
+                        })
+                        
+                        NavigationLink(destination: AllActivitiesView(allActivities: $allActivities), label: {
+                            Text("Todos os rolês")
+                        })
                     }
                 }
             }
         }.padding()
-        .task(id: locationManager.currentLocation) {
+            .task(id: locationManager.currentLocation) {
                 if let currentLocation = locationManager.currentLocation, selectedCity == nil {
                     selectedCity = currentLocation
                 }
             }
         
-        .task(id: selectedCity) {
-            if let selectedCity {
-                await fetchWeatherView(for: selectedCity)
+            .task(id: selectedCity) {
+                if let selectedCity {
+                    await fetchWeatherView(for: selectedCity)
+                }
             }
-        }
     }
-
+    
     
     func fetchWeatherView(for city: City) async {
         isLoading = true
