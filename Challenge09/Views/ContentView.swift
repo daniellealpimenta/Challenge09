@@ -23,74 +23,87 @@ struct ContentView: View {
     @State private var weather: Weather?
     @State private var isLoading = false
     
+    @State var allActivities: [Activity] = []
+    var activity: Activity = Activity(name: "", maxDays: 2, activityType: .beachDay,)
+    
     var body: some View {
-        VStack {
-            if let selectedCity {
-                if isLoading {
-                    ProgressView()
-                    Text("Fazendo requisição do Clima...")
-                } else {
-                    Text(selectedCity.name)
-                        .font(.title)
-                        .padding()
-                    
-                    if let weather {
-                        Text(Date.now.formatted(date: .abbreviated, time: .omitted))
-                        Text(Date.now.formatted(date: .omitted, time: .shortened))
-                        Image(systemName: weather.currentWeather.symbolName)
-                            .renderingMode(.original)
-                            .symbolVariant(.fill)
-                            .font(.system(size: 60.0, weight: .bold))
+        NavigationStack {
+            VStack {
+                if let selectedCity {
+                    if isLoading {
+                        ProgressView()
+                        Text("Fazendo requisição do Clima...")
+                    } else {
+                        Text(selectedCity.name)
+                            .font(.title)
                             .padding()
-                            .background(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(.secondary.opacity(0.2))
-                            )
-                        let temp = weatherManager.temperatureFormatter.string(from: weather.currentWeather.temperature)
-                        Text(temp)
-                            .font(.title2)
-                        Text(weather.currentWeather.condition.description)
-                            .font(.title3)
-                        AttributionView()
-                        NotificationButton()
-
                         
-                        if let bestDays {
-                            RecommendedDaysView(bestDays: bestDays)
+                        if let weather {
+                            Text(Date.now.formatted(date: .abbreviated, time: .omitted))
+                            Text(Date.now.formatted(date: .omitted, time: .shortened))
+                            Image(systemName: weather.currentWeather.symbolName)
+                                .renderingMode(.original)
+                                .symbolVariant(.fill)
+                                .font(.system(size: 60.0, weight: .bold))
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .fill(.secondary.opacity(0.2))
+                                )
+                            let temp = weatherManager.temperatureFormatter.string(from: weather.currentWeather.temperature)
+                            Text(temp)
+                                .font(.title2)
+                            Text(weather.currentWeather.condition.description)
+                                .font(.title3)
+                            AttributionView()
+                            Text(weatherManager.weatherDays.count.description + " dias de previsão")
+                            NotificationButton()
                         }
+
+                        //if let bestDays {
+                        //    RecommendedDaysView(bestDays: bestDays)
+                        //}
+                        
+                        NavigationLink(destination: AddNewActivity(allActivities: $allActivities, newActivity: activity), label: {
+                            Text("Adicionar novo rolê")
+                        })
+                        
+                        NavigationLink(destination: AllActivitiesView(allActivities: $allActivities), label: {
+                            Text("Todos os rolês")
+                        })
                     }
                 }
             }
         }.padding()
-        .task(id: locationManager.currentLocation) {
+            .task(id: locationManager.currentLocation) {
                 if let currentLocation = locationManager.currentLocation, selectedCity == nil {
                     selectedCity = currentLocation
                 }
             }
         
-        .task(id: selectedCity) {
-            if let selectedCity {
-                await fetchWeatherView(for: selectedCity)
-            }
-        }
-        
-        .task(id: weatherManager.weatherDays.count) {
-            if !weatherManager.weatherDays.isEmpty {
-                let recomendations =  await recommendedDaysManager.calculateRecommendations(weather: weatherManager.weatherDays)
-                
-                if !recomendations.isEmpty {
-                    bestDays = await recommendedDaysManager.generateWeatherResponses(weather: weatherManager.weatherDays, recommendationDays: recomendations)
-
+            .task(id: selectedCity) {
+                if let selectedCity {
+                    await fetchWeatherView(for: selectedCity)
                 }
-                                
-//                print("✅ Foram carregados \(weatherManager.weatherDays.count) dias:")
-//                for day in weatherManager.weatherDays {
-//                    print("📅 Date: \(day.dateWeather) | 🌡️ Temperatura: \(day.highestTemperature)°C | ☔️ Chance de chuva: \(day.precipitationChance)% | 🔆 UV Index: \(day.uvIndex) | 🌧️ Humidade: \(day.maximumHumidity)%")
-//                }
             }
+        
+          .task(id: weatherManager.weatherDays.count) {
+              if !weatherManager.weatherDays.isEmpty {
+                  let recomendations =  await recommendedDaysManager.calculateRecommendations(weather: weatherManager.weatherDays)
+
+                  if !recomendations.isEmpty {
+                      bestDays = await recommendedDaysManager.generateWeatherResponses(weather: weatherManager.weatherDays, recommendationDays: recomendations)
+
+                  }
+
+  //                print("✅ Foram carregados \(weatherManager.weatherDays.count) dias:")
+  //                for day in weatherManager.weatherDays {
+  //                    print("📅 Date: \(day.dateWeather) | 🌡️ Temperatura: \(day.highestTemperature)°C | ☔️ Chance de chuva: \(day.precipitationChance)% | 🔆 UV Index: \(day.uvIndex) | 🌧️ Humidade: \(day.maximumHumidity)%")
+  //                }
+              }
         }
     }
-
+    
     
     func fetchWeatherView(for city: City) async {
         isLoading = true

@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct Challenge09App: App {
     @State private var locationManager = LocationManager()
-    @UIApplicationDelegateAdaptor var appDelegate: PushNotificationDelegate 
+    @UIApplicationDelegateAdaptor var appDelegate: PushNotificationDelegate
      
     var body: some Scene {
         WindowGroup {
@@ -24,5 +25,6 @@ struct Challenge09App: App {
             }
                 
         }.environment(locationManager)
+            .modelContainer(for: DaySelectedModel.self)
     }
 }
