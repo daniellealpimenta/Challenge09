@@ -11,12 +11,12 @@ import SwiftData
 @Model class DaySelectedModel {
     @Attribute(.unique) var id = UUID()
     var nameActivity: String
-    var date: Date
+    var date: String
     var temperature: Double
     var preciptationChance: Double
     var uvIndex: Int
     
-    init(nameActivity: String, date: Date, temperature: Double, preciptationChance: Double, uvIndex: Int) {
+    init(nameActivity: String, date: String, temperature: Double, preciptationChance: Double, uvIndex: Int) {
         self.nameActivity = nameActivity
         self.date = date
         self.temperature = temperature
