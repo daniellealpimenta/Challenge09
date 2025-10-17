@@ -16,6 +16,10 @@ struct ContentView: View {
     @State private var selectedCity: City?
     
     let weatherManager = WeatherManager.shared
+    let recommendedDaysManager = RecommendedDays.shared
+    
+    @State private var bestDays: [WeatherResponse]?
+    
     @State private var weather: Weather?
     @State private var isLoading = false
     
@@ -48,8 +52,12 @@ struct ContentView: View {
                         Text(weather.currentWeather.condition.description)
                             .font(.title3)
                         AttributionView()
-                        Text(weatherManager.weatherDays.count.description + " dias de previsão")
                         NotificationButton()
+
+                        
+                        if let bestDays {
+                            RecommendedDaysView(bestDays: bestDays)
+                        }
                     }
                 }
             }
@@ -65,6 +73,22 @@ struct ContentView: View {
                 await fetchWeatherView(for: selectedCity)
             }
         }
+        
+        .task(id: weatherManager.weatherDays.count) {
+            if !weatherManager.weatherDays.isEmpty {
+                let recomendations =  await recommendedDaysManager.calculateRecommendations(weather: weatherManager.weatherDays)
+                
+                if !recomendations.isEmpty {
+                    bestDays = await recommendedDaysManager.generateWeatherResponses(weather: weatherManager.weatherDays, recommendationDays: recomendations)
+
+                }
+                                
+//                print("✅ Foram carregados \(weatherManager.weatherDays.count) dias:")
+//                for day in weatherManager.weatherDays {
+//                    print("📅 Date: \(day.dateWeather) | 🌡️ Temperatura: \(day.highestTemperature)°C | ☔️ Chance de chuva: \(day.precipitationChance)% | 🔆 UV Index: \(day.uvIndex) | 🌧️ Humidade: \(day.maximumHumidity)%")
+//                }
+            }
+        }
     }
 
     
@@ -77,7 +101,7 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
-        .environment(LocationManager())
-}
+//#Preview {
+//    ContentView()
+//        .environment(LocationManager())
+//}
