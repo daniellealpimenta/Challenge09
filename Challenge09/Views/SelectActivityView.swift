@@ -74,7 +74,7 @@ struct SelectActivityView: View {
                 modelContext.insert(newAcitivity)
                 try? modelContext.save()
                 
-                print("Botao funcionando")
+                print("Foi salvo: \(newAcitivity.nameActivity)")
             }, label: {
                 Text("Salvar role")
             })
