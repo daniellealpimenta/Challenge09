@@ -13,15 +13,16 @@ struct AddNewActivity: View {
     @State private var maxDays = 1
     @State private var activityType: ActivityType = .walkingDog
     @Binding var allActivities: [Activity]
-    
+    @State var newActivity: Activity
     var body: some View {
+        NavigationStack{
             Form {
                 Section("Como deseja chamar esse rolê?") {
-                    TextField("Ex: Parque com os amigos", text: $name)
+                    TextField("Ex: Parque com os amigos", text: $newActivity.name)
                 }
                 
                 Section("Em até quantos dias?") {
-                    Picker("Dias", selection: $maxDays) {
+                    Picker("Dias", selection: $newActivity.maxDays) {
                         ForEach(1..<11) { number in
                             Text("\(number) dia\(number == 1 ? "" : "s")")
                         }
@@ -30,7 +31,7 @@ struct AddNewActivity: View {
                 }
                 
                 Section("Qual o tipo de atividade?") {
-                    Picker("Atividade", selection: $activityType) {
+                    Picker("Atividade", selection: $newActivity.activityType) {
                         ForEach(ActivityType.allCases, id: \.self) { activity in
                             Text(activity.rawValue)
                         }
@@ -38,27 +39,31 @@ struct AddNewActivity: View {
                     .pickerStyle(.menu)
                 }
                 
-                Button("Salvar rolê") {
-                    let newActivity = Activity(
-                        name: name,
-                        maxDays: maxDays,
-                        activityType: activityType)
-                    allActivities.append(newActivity)
-                    name = ""
-                    maxDays = 1
-                    activityType = .walkingDog
-                    dismiss()
-                }
+//                Button("Salvar rolê") {
+//                    let newActivity = Activity(
+//                        name: name,
+//                        maxDays: maxDays,
+//                        activityType: activityType)
+//                    allActivities.append(newActivity)
+//                    name = ""
+//                    maxDays = 1
+//                    activityType = .walkingDog
+//                    dismiss()
+//                }
+                NavigationLink(destination: SelectActivityView(activityMoment: newActivity), label: {
+                    Text("Ver previsões")
+                })
             }
+        }
         
         .navigationTitle("Novo rolê")
     }
 }
-#Preview {
-    AddNewActivity(
-            allActivities: .constant([
-                Activity(name: "a", maxDays: 2, activityType: .beachDay)
-            ])
-        )
-}
+//#Preview {
+//    AddNewActivity(
+//            allActivities: .constant([
+//                Activity(name: "a", maxDays: 2, activityType: .beachDay)
+//            ])
+//        )
+//}
 

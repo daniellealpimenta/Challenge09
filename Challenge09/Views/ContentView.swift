@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var isLoading = false
     
     @State var allActivities: [Activity] = []
+    var activity: Activity = Activity(name: "", maxDays: 2, activityType: .beachDay,)
     
     var body: some View {
         NavigationStack {
@@ -55,7 +56,7 @@ struct ContentView: View {
                             NotificationButton()
                         }
                         
-                        NavigationLink(destination: AddNewActivity(allActivities: $allActivities), label: {
+                        NavigationLink(destination: AddNewActivity(allActivities: $allActivities, newActivity: activity), label: {
                             Text("Adicionar novo rolê")
                         })
                         
