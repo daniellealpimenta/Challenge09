@@ -7,13 +7,10 @@
 
 import SwiftUI
 
-struct AddNewActivity: View {
+struct AddNewActivityView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var name = ""
-    @State private var maxDays = 1
-    @State private var activityType: ActivityType = .walkingDog
     @Binding var allActivities: [Activity]
-    @State var newActivity: Activity
+    @State var newActivity = Activity(name: "", maxDays: 1, activityType: .walkingDog)
     var body: some View {
         NavigationStack{
             Form {

@@ -64,7 +64,7 @@ struct ContentView: View {
                         //    RecommendedDaysView(bestDays: bestDays)
                         //}
                         
-                        NavigationLink(destination: AddNewActivity(allActivities: $allActivities, newActivity: activity), label: {
+                        NavigationLink(destination: AddNewActivityView(allActivities: $allActivities, newActivity: activity), label: {
                             Text("Adicionar novo rolê")
                         })
                         
