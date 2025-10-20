@@ -23,9 +23,6 @@ struct ContentView: View {
     @State private var weather: Weather?
     @State private var isLoading = false
     
-    @State var allActivities: [Activity] = []
-    var activity: Activity = Activity(name: "", maxDays: 2, activityType: .beachDay,)
-    
     var body: some View {
         NavigationStack {
             VStack {
@@ -64,11 +61,11 @@ struct ContentView: View {
                         //    RecommendedDaysView(bestDays: bestDays)
                         //}
                         
-                        NavigationLink(destination: AddNewActivity(allActivities: $allActivities, newActivity: activity), label: {
+                        NavigationLink(destination: AddNewActivity(), label: {
                             Text("Adicionar novo rolê")
                         })
                         
-                        NavigationLink(destination: AllActivitiesView(allActivities: $allActivities), label: {
+                        NavigationLink(destination: AllActivitiesView(), label: {
                             Text("Todos os rolês")
                         })
                     }
