@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AddNewActivity: View {
+struct AddNewActivityView: View {
     @Environment(\.dismiss) var dismiss
     @State private var name = ""
     @State private var maxDays = 1
