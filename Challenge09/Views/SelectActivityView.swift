@@ -72,6 +72,7 @@ struct SelectActivityView: View {
                     uvIndex: mockWeatherData[selectedDay].uvIndex)
                 
                 modelContext.insert(newAcitivity)
+                
                 try? modelContext.save()
                 
                 print("Foi salvo: \(newAcitivity.nameActivity)")
