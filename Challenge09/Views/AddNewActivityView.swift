@@ -39,20 +39,27 @@ struct AddNewActivity: View {
                     .pickerStyle(.menu)
                 }
                 
-//                Button("Salvar rolê") {
-//                    let newActivity = Activity(
-//                        name: name,
-//                        maxDays: maxDays,
-//                        activityType: activityType)
-//                    allActivities.append(newActivity)
-//                    name = ""
-//                    maxDays = 1
-//                    activityType = .walkingDog
-//                    dismiss()
-//                }
-                NavigationLink(destination: SelectActivityView(activityMoment: newActivity), label: {
-                    Text("Ver previsões")
-                })
+                //                Button("Salvar rolê") {
+                //                    let newActivity = Activity(
+                //                        name: name,
+                //                        maxDays: maxDays,
+                //                        activityType: activityType)
+                //                    allActivities.append(newActivity)
+                //                    name = ""
+                //                    maxDays = 1
+                //                    activityType = .walkingDog
+                //                    dismiss()
+                //                }
+                NavigationLink(
+                    destination: SelectActivityView(
+                        activityMoment: newActivity,
+                        //adicionei para puxar no SelectActivityView!!
+                        maxDaysToShow: newActivity.maxDays
+                    ),
+                    label: {
+                        Text("Ver previsões")
+                    }
+                )
             }
         }
         
