@@ -23,34 +23,6 @@ struct SelectActivityView: View {
         let maxDaysToShow: Int
 
     
-    
-//    let mockWeatherData: [WeatherDataModelMock] = [
-//        WeatherDataModelMock(
-//            date: "2025-10-17",
-//            temperature: 28.5,
-//            precipitationChance: 0.2,
-//            humidity: 65.0,
-//            uvIndex: 7,
-//            recomendationDegree: 8
-//        ),
-//        WeatherDataModelMock(
-//            date: "2025-10-18",
-//            temperature: 25.3,
-//            precipitationChance: 0.6,
-//            humidity: 80.0,
-//            uvIndex: 4,
-//            recomendationDegree: 5
-//        ),
-//        WeatherDataModelMock(
-//            date: "2025-10-19",
-//            temperature: 30.1,
-//            precipitationChance: 0.1,
-//            humidity: 55.0,
-//            uvIndex: 9,
-//            recomendationDegree: 9
-//        )
-//    ]
-    
     var body: some View {
             VStack {
                 Text("Nome do role: \(activityMoment.name)")
