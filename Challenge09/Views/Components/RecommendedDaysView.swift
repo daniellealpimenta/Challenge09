@@ -9,6 +9,10 @@ import SwiftUI
 
 public struct RecommendedDaysView: View {
     @State var bestDays: [WeatherResponse]
+    @State private var weatherData: [WeatherModel] = []
+    @State private var isLoading = true
+    @State private var locationManager = LocationManager()
+
 
     public var body: some View {
         
