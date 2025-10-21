@@ -55,13 +55,14 @@ struct ContentView: View {
                             AttributionView()
                             Text(weatherManager.weatherDays.count.description + " dias de previsão")
                             NotificationButton()
+                            HomeView()
                         }
 
                         if let bestDays {
                             RecommendedDaysView(bestDays: bestDays)
                         }
                         
-                        NavigationLink(destination: AddNewActivityView(allActivities: $allActivities, newActivity: activity), label: {
+                        NavigationLink(destination: AddNewActivityView(), label: {
                             Text("Adicionar novo rolê")
                         })
                         
@@ -111,7 +112,7 @@ struct ContentView: View {
     }
 }
 
-//#Preview {
-//    ContentView()
-//        .environment(LocationManager())
-//}
+#Preview {
+    ContentView()
+        .environment(LocationManager())
+}
