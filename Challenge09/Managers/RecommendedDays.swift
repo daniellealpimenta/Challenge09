@@ -8,70 +8,115 @@
 struct RecommendedDays {
     
     static let shared = RecommendedDays()
+
+    func config(for activity: ActivityType) -> (weights: WeatherWeights, prefs: ActivityPreferences) {
+        switch activity {
+        case .beachDay:
+            return (
+                WeatherWeights(temp: 0.4, rain: 0.2, uv: 0.3, humidity: 0.1),
+                ActivityPreferences(
+                    idealTemp: 28...32, maxTemp: 24...36,
+                    idealUv: 4...9, maxUv: 0...11,
+                    idealRain: 10, maxRain: 30,
+                    idealHumidity: 45...65, maxHumidity: 35...75
+                )
+            )
+        case .picnic:
+            return (
+                WeatherWeights(temp: 0.3, rain: 0.4, uv: 0.2, humidity: 0.1),
+                ActivityPreferences(
+                    idealTemp: 22...28, maxTemp: 18...32,
+                    idealUv: 2...7, maxUv: 0...10,
+                    idealRain: 0, maxRain: 30,
+                    idealHumidity: 40...65, maxHumidity: 30...75
+                )
+            )
+        case .running:
+            return (
+                WeatherWeights(temp: 0.3, rain: 0.2, uv: 0.3, humidity: 0.2),
+                ActivityPreferences(
+                    idealTemp: 16...24, maxTemp: 10...28,
+                    idealUv: 0...6, maxUv: 0...8,
+                    idealRain: 20, maxRain: 40,
+                    idealHumidity: 40...70, maxHumidity: 30...80
+                )
+            )
+        default:
+            return (
+                WeatherWeights(temp: 0.3, rain: 0.3, uv: 0.2, humidity: 0.2),
+                ActivityPreferences(
+                    idealTemp: 20...28, maxTemp: 15...32,
+                    idealUv: 0...8, maxUv: 0...10,
+                    idealRain: 20, maxRain: 50,
+                    idealHumidity: 40...70, maxHumidity: 30...80
+                )
+            )
+        }
+    }
     
-    public func calculateRecommendations(weather: [WeatherModel]) async -> [(recommendation: Int,date: String)] {
+    /// Retorna uma pontuação de 0 a 100 baseada na distância do valor até o intervalo ideal
+    func score(for value: Double, ideal: ClosedRange<Double>, allowed: ClosedRange<Double>) -> Double {
+        if ideal.contains(value) { return 100 }
+        if value < allowed.lowerBound || value > allowed.upperBound { return 0 }
+
+        // distância proporcional ao afastamento do ideal
+        let dist = min(abs(value - ideal.lowerBound), abs(value - ideal.upperBound))
+        let maxDist = allowed.upperBound - ideal.upperBound
+        return max(0, 100 - (dist / maxDist * 100))
+    }
+
+    /// Mesmo conceito, mas invertido (quanto MENOR, melhor — ex: chuva)
+    func inverseScore(for value: Double, ideal: Double, maxAllowed: Double) -> Double {
+        let v = value <= 1 ? value * 100 : value // converte 0–1 para %
+        if v <= ideal { return 100 }
+        if v >= maxAllowed { return 0 }
+        let frac = (v - ideal) / (maxAllowed - ideal)
+        return Swift.max(0, 100 * (1 - frac))
+    }
+    
+    func conditionScore(_ condition: String, for activity: ActivityType) -> Double {
+        let baseScores: [String: Double] = [
+            "clear": 100, "mostlyClear": 90, "partlyCloudy": 85,
+            "mostlyCloudy": 70, "cloudy": 60, "foggy": 40,
+            "haze": 40, "smoky": 30, "blowingDust": 30
+        ]
+        let base = baseScores[condition] ?? 50
         
-        var recommendationDays: [(recommendation: Int, date: String)] = []
+        switch activity {
+        case .beachDay, .picnic, .photography:
+            return base
+        case .running, .cycling, .walkingDog:
+            return min(100, base + 10) // nublado não atrapalha
+        case .meditation, .camping:
+            if ["partlyCloudy", "mostlyClear"].contains(condition) { return 100 }
+            return base
+        default:
+            return base
+        }
+    }
+    
+    public func calculateRecommendations(weather: [WeatherModel], activity: Activity) async -> [(recommendation: Int, date: String)] {
+        var results: [(recommendation: Int, date: String)] = []
+        let (w, p) = config(for: activity.activityType)
         
         for day in weather {
-            // 1️⃣ Temperatura (ideal 22–28°C)
-            let tempScore: Double
-            if day.highestTemperature < 18 || day.highestTemperature > 32 {
-                tempScore = 0
-            } else if day.highestTemperature < 22 {
-                tempScore = (day.highestTemperature - 18) / 4 * 100
-            } else if day.highestTemperature <= 28 {
-                tempScore = 100
-            } else {
-                tempScore = max(0, (32 - day.highestTemperature) / 4 * 100)
-            }
-
-            // 2️⃣ Chance de chuva (0–20% é ótimo)
-            let rainScore: Double
-            if day.precipitationChance <= 20 {
-                rainScore = 100
-            } else if day.precipitationChance <= 50 {
-                rainScore = 100 - ((day.precipitationChance - 20) / 30 * 50)
-            } else {
-                rainScore = max(0, 50 - ((day.precipitationChance - 50) / 50 * 50))
-            }
-
-            // 3️⃣ UV Index (0–7 é bom, >10 é ruim)
-            let uvScore: Double
-            if day.uvIndex <= 7 {
-                uvScore = 100
-            } else if day.uvIndex <= 10 {
-                uvScore = 100 - Double((day.uvIndex - 7) * 20)
-            } else {
-                uvScore = 0
-            }
-
-            // 4️⃣ Umidade máxima (40–65% ideal)
-            let humidityScore: Double
-            if day.maximumHumidity < 40 {
-                humidityScore = (day.maximumHumidity / 40) * 100
-            } else if day.maximumHumidity <= 65 {
-                humidityScore = 100
-            } else if day.maximumHumidity <= 80 {
-                humidityScore = 100 - ((day.maximumHumidity - 65) / 15 * 50)
-            } else {
-                humidityScore = 0
-            }
-
-            // 5️⃣ Cálculo ponderado final
-            let finalScore = Int(
-                (tempScore * 0.4) +
-                (rainScore * 0.3) +
-                (uvScore * 0.2) +
-                (humidityScore * 0.1)
-            )
+            let tempScore = score(for: day.highestTemperature, ideal: p.idealTemp, allowed: p.maxTemp)
+            let uvScore = score(for: Double(day.uvIndex), ideal: p.idealUv, allowed: p.maxUv)
+            let rainScore = inverseScore(for: day.precipitationChance, ideal: p.idealRain, maxAllowed: p.maxRain)
+            let humidityScore = score(for: day.maximumHumidity, ideal: p.idealHumidity, allowed: p.maxHumidity)
+            let condScore = conditionScore(day.condition, for: activity.activityType)
             
-            recommendationDays.append((recommendation: finalScore, date: day.dateWeather))
+            let total = (tempScore * w.temp) +
+                        (rainScore * w.rain) +
+                        (uvScore * w.uv) +
+                        (humidityScore * w.humidity) +
+                        (condScore * 0.1)
             
+            results.append((recommendation: Int(min(100, total.rounded())), date: day.dateWeather))
         }
-        
-        return recommendationDays
+        return results
     }
+
     
     public func generateWeatherResponses(weather: [WeatherModel], recommendationDays: [(recommendation: Int, date: String)]) async -> [WeatherResponse] {
         
@@ -79,22 +124,43 @@ struct RecommendedDays {
         
         let topDays = recommendationDays.sorted { $0.recommendation > $1.recommendation }.prefix(3)
         
-        for i in topDays {
-            print("Recommendation: \(i.recommendation), Date: \(i.date)")
-        }
+//        for i in topDays {
+//            print("Recommendation: \(i.recommendation), Date: \(i.date)")
+//        }
         
         for day in weather {
             for i in topDays {
                 if day.dateWeather == i.date {
-                    let recommendedDay = WeatherResponse.init(date: day.dateWeather, temperature: day.highestTemperature, precipitationChance: day.precipitationChance, humidity: day.maximumHumidity, uvIndex: day.uvIndex, recomendationDegree: i.recommendation)
+                    let recommendedDay = WeatherResponse.init(date: day.dateWeather, temperature: day.highestTemperature, precipitationChance: day.precipitationChance, humidity: day.maximumHumidity, uvIndex: day.uvIndex,condition: day.condition, symbolWeather: day.symbolWeather ?? "", recommendationDegree: i.recommendation)
                     weatherResponses.append(recommendedDay)
                 }
             }
         }
         
-        weatherResponses.sort { $0.recomendationDegree > $1.recomendationDegree }
+        weatherResponses.sort { $0.recommendationDegree > $1.recommendationDegree }
         
         return weatherResponses
         
     }
 }
+
+// Pesos dos fatores (temperatura, chuva, UV, umidade)
+struct WeatherWeights {
+    let temp: Double
+    let rain: Double
+    let uv: Double
+    let humidity: Double
+}
+
+// Preferências climáticas por atividade
+struct ActivityPreferences {
+    let idealTemp: ClosedRange<Double>
+    let maxTemp: ClosedRange<Double>
+    let idealUv: ClosedRange<Double>
+    let maxUv: ClosedRange<Double>
+    let idealRain: Double
+    let maxRain: Double
+    let idealHumidity: ClosedRange<Double>
+    let maxHumidity: ClosedRange<Double>
+}
+

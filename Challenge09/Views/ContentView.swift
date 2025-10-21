@@ -57,9 +57,9 @@ struct ContentView: View {
                             NotificationButton()
                         }
 
-                        //if let bestDays {
-                        //    RecommendedDaysView(bestDays: bestDays)
-                        //}
+                        if let bestDays {
+                            RecommendedDaysView(bestDays: bestDays)
+                        }
                         
                         NavigationLink(destination: AddNewActivityView(allActivities: $allActivities, newActivity: activity), label: {
                             Text("Adicionar novo rolê")
@@ -86,17 +86,17 @@ struct ContentView: View {
         
           .task(id: weatherManager.weatherDays.count) {
               if !weatherManager.weatherDays.isEmpty {
-                  let recomendations =  await recommendedDaysManager.calculateRecommendations(weather: weatherManager.weatherDays)
+                  let recomendations =  await recommendedDaysManager.calculateRecommendations(weather: weatherManager.weatherDays, activity: Activity.init(name: "Exemplo - PRAIA", maxDays: 10, activityType: .picnic))
 
                   if !recomendations.isEmpty {
                       bestDays = await recommendedDaysManager.generateWeatherResponses(weather: weatherManager.weatherDays, recommendationDays: recomendations)
 
                   }
 
-  //                print("✅ Foram carregados \(weatherManager.weatherDays.count) dias:")
-  //                for day in weatherManager.weatherDays {
-  //                    print("📅 Date: \(day.dateWeather) | 🌡️ Temperatura: \(day.highestTemperature)°C | ☔️ Chance de chuva: \(day.precipitationChance)% | 🔆 UV Index: \(day.uvIndex) | 🌧️ Humidade: \(day.maximumHumidity)%")
-  //                }
+//                  print("✅ Foram carregados \(weatherManager.weatherDays.count) dias:")
+//                  for day in weatherManager.weatherDays {
+//                      print("📅 Date: \(day.dateWeather) | 🌡️ Temperatura: \(day.highestTemperature)°C | ☔️ Chance de chuva: \(day.precipitationChance)% | 🔆 UV Index: \(day.uvIndex) | 🌧️ Humidade: \(day.maximumHumidity)%")
+//                  }
               }
         }
     }

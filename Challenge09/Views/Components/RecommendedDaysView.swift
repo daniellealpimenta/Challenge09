@@ -8,11 +8,8 @@
 import SwiftUI
 
 public struct RecommendedDaysView: View {
+    
     @State var bestDays: [WeatherResponse]
-    @State private var weatherData: [WeatherModel] = []
-    @State private var isLoading = true
-    @State private var locationManager = LocationManager()
-
 
     public var body: some View {
         
@@ -21,18 +18,19 @@ public struct RecommendedDaysView: View {
             .padding(.bottom, 4)
         
         ScrollView {
-            // Apenas remova o '$' daqui.
-            ForEach(bestDays) { day in
+            ForEach($bestDays, id: \.date) { day in
                 
                 VStack(alignment: .leading, spacing: 6) {
                     
-                    Text("📅 Dia: \(day.date)")
+                    Text("📅 Dia: \(day.date.wrappedValue)")
                         .font(.subheadline)
-                    Text("🌡️ Temperatura: \(day.temperature, specifier: "%.1f")°C")
-                    Text("☔️ Chance de chuva: \(day.precipitationChance * 100, specifier: "%.0f")%")
-                    Text("🔆 UV Index: \(day.uvIndex)")
-                    Text("⭐️ Recomendação: \(day.recomendationDegree)% / 100%")
+                    Text("🌡️ Temperatura: \(day.temperature.wrappedValue, specifier: "%.1f")°C")
+                    Text("☔️ Chance de chuva: \(day.precipitationChance.wrappedValue * 100, specifier: "%.0f")%")
+                    Text("💧 Humidade: \(day.humidity.wrappedValue * 100, specifier: "%.0f")%")
+                    Text("🔆 UV Index: \(day.uvIndex.wrappedValue)")
+                    Text("⭐️ Recomendação: \(day.wrappedValue.recommendationDegree) / 100")
                         .bold()
+                    Text("☂️ Condição: \(day.condition.wrappedValue)")
                 }
                 .padding()
                 .background(
@@ -50,3 +48,4 @@ public struct RecommendedDaysView: View {
 //#Preview {
 //    FoundationButton()
 //}
+
