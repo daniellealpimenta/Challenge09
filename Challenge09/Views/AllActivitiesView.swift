@@ -14,10 +14,17 @@ struct AllActivitiesView: View {
     var body: some View {
         List {
             ForEach(activities, id: \.id) { activity in
-                HStack {
-                    Text("Date:")
-                    Spacer()
-                    Text(activity.date)
+                VStack{
+                    HStack {
+                        Text("Date:")
+                        Spacer()
+                        Text(activity.date)
+                    }
+                    HStack {
+                        Text("Nome:")
+                        Spacer()
+                        Text(activity.nameActivity)
+                    }
                 }
             }
         }

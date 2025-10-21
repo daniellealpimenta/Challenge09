@@ -15,10 +15,13 @@ struct SelectActivityView: View {
         @State private var weatherData: [WeatherModel] = []
         @State private var isLoading = true
         @State private var errorMessage: String?
+    
+        @State private var recommendedDaysCount: Int = 0
 
         @State private var locationManager = LocationManager()
     
         @Environment(\.modelContext) private var modelContext
+
         let activityMoment: Activity
         let maxDaysToShow: Int
 
@@ -58,11 +61,12 @@ struct SelectActivityView: View {
                                     Spacer()
                                     if selectedDay == index {
                                         Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(.white)
                                     }
                                 }
                                 .padding()
-                                .background(Color.gray.opacity(0.1))
+                                .background(index < recommendedDaysCount ? Color.blue: Color.gray.opacity(0.1))
+                                .foregroundColor(index < recommendedDaysCount ? .white : .primary)
                                 .cornerRadius(12)
                             }
                         }
@@ -90,54 +94,67 @@ struct SelectActivityView: View {
             }
         }
 
-        private func loadWeather() async {
-            guard let location = locationManager.userlocation else {
-                await MainActor.run {
-                    isLoading = false
-                    errorMessage = "Não foi possível obter sua localização."
-                }
-                return
-            }
-
-            let weather = await WeatherManager.shared.fetchWeather(for: location)
+    private func loadWeather() async {
+        guard let location = locationManager.userlocation else {
             await MainActor.run {
-                if let _ = weather {
-                    let allDays = WeatherManager.shared.weatherDays
-                    //estava mostrando o numero selecionada - 1
-                    // se for pular o dia atual -> usar o drop first
-                    weatherData = Array(allDays.prefix(maxDaysToShow + 1))
-                } else {
-                    errorMessage = "Falha ao buscar dados do clima."
-                }
                 isLoading = false
+                errorMessage = "Não foi possível obter sua localização."
             }
-
-
+            return
         }
 
-        private func saveSelectedDay() {
-            let selected = weatherData[selectedDay]
-            let newActivity = DaySelectedModel(
-                nameActivity: activityMoment.name,
-                date: selected.dateWeather,
-                temperature: selected.highestTemperature,
-                preciptationChance: selected.precipitationChance,
-                uvIndex: selected.uvIndex
-            )
+        let weather = await WeatherManager.shared.fetchWeather(for: location)
+        
+        await MainActor.run {
+            if weather != nil {
+                let allDays = WeatherManager.shared.weatherDays
+                let daysToConsider = Array(allDays.prefix(maxDaysToShow + 1))
+                
+                Task {
+                    let recommendations = await RecommendedDays.shared.calculateRecommendations(weather: daysToConsider)
+                    let topRecommendations = recommendations.sorted { $0.recommendation > $1.recommendation }.prefix(3)
+                    let topDates = Set(topRecommendations.map { $0.date })
+                    let recommendedDaysData = topRecommendations.compactMap { recommendation in
+                        daysToConsider.first { $0.dateWeather == recommendation.date }
+                    }
 
-            modelContext.insert(newActivity)
-            try? modelContext.save()
-            print("Salvo: \(newActivity.nameActivity) - \(newActivity.date)")
+                    self.recommendedDaysCount = recommendedDaysData.count
+                    
+                    let remainingDaysData = daysToConsider.filter { !topDates.contains($0.dateWeather) }
+                    self.weatherData = recommendedDaysData + remainingDaysData
+                    self.isLoading = false
+                }
+            } else {
+                errorMessage = "Falha ao buscar dados do clima."
+                self.isLoading = false
+            }
         }
+    }
+    
+    
+    private func saveSelectedDay() {
+        let selected = weatherData[selectedDay]
+        let newActivity = DaySelectedModel(
+            nameActivity: activityMoment.name,
+            date: selected.dateWeather,
+            temperature: selected.highestTemperature,
+            preciptationChance: selected.precipitationChance,
+            uvIndex: selected.uvIndex
+        )
+
+        modelContext.insert(newActivity)
+        try? modelContext.save()
+        print("Salvo: \(newActivity.nameActivity) - \(newActivity.date)")
+    }
     }
 
 
 //var body: some View {
-//        
+//
 //        VStack{
 //            Text("Nome do role: \(activityMoment.name)")
 //            ForEach(Array(mockWeatherData.enumerated()), id: \.offset) {index,data in
-//                
+//
 //                Button(action: {
 //                    selectedDay = index
 //                    print(mockWeatherData[selectedDay].humidity)
@@ -159,19 +176,19 @@ struct SelectActivityView: View {
 //                    temperature: mockWeatherData[selectedDay].temperature,
 //                    preciptationChance: mockWeatherData[selectedDay].precipitationChance,
 //                    uvIndex: mockWeatherData[selectedDay].uvIndex)
-//                
+//
 //                modelContext.insert(newAcitivity)
 //                try? modelContext.save()
-//                
+//
 //                print("Foi salvo: \(newAcitivity.nameActivity)")
 //            }, label: {
 //                Text("Salvar role")
 //            })
 //        }
-//        
-//                
+//
+//
 //    }
-//    
+//
 //}
 
 //#Preview {

@@ -24,7 +24,7 @@ struct HomeView: View {
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 25) {
-                        NavigationLink(destination: AddNewActivityView(allActivities: $allActivities)) {
+                        NavigationLink(destination: AddNewActivityView()) {
                             ZStack {
                                 LinearGradient(
                                     colors: [Color.yellow.opacity(0.9), Color.orange.opacity(0.8)],
