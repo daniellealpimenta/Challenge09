@@ -18,6 +18,12 @@ struct PasseioModel: Hashable {
     let descricaoEvento: String
     let weatherContent: String
     let temperatura: Double
+    let humidity: Double
+    let uvIndex: Int
+    let symbolWeather: String
+    let recommendationDegree: Int
+    let preciptationChance: Double
+    
 
     func toCKRecord() -> CKRecord {
         let record = CKRecord(recordType: "Passeio")
@@ -27,6 +33,11 @@ struct PasseioModel: Hashable {
         record["descricaoEvento"] = descricaoEvento as CKRecordValue
         record["weatherContent"] = weatherContent as CKRecordValue
         record["temperatura"] = weatherContent as CKRecordValue
+        record["humidity"] = weatherContent as CKRecordValue
+        record["uvIndex"] = weatherContent as CKRecordValue
+        record["symbolWeather"] = weatherContent as CKRecordValue
+        record["recommendationDegree"] = weatherContent as CKRecordValue
+        record["preciptationChance"] = weatherContent as CKRecordValue
         return record
     }
 }
@@ -37,6 +48,11 @@ class CloudKitCRUDViewModel: ObservableObject {
     @Published var local: String = ""
     @Published var passeios: [PasseioModel] = []
     @Published var temperatura: Double = 0.0
+    @Published var humidity: Double = 0.0
+    @Published var uvIndex: Int = 0
+    @Published var symbolWeather: String = ""
+    @Published var recommendationDegree: Int = 0
+    @Published var preciptationChance: Double = 0.0
     
     init(){
         fetchItems()
@@ -51,6 +67,11 @@ class CloudKitCRUDViewModel: ObservableObject {
         novoPasseio["descricaoEvento"] = "Passeio ao ar livre"
         novoPasseio["weatherContent"] = "parcialmente nublado"
         novoPasseio["temperatura"] = temperatura
+        novoPasseio["humidity"] = humidity
+        novoPasseio["uvIndex"] = uvIndex
+        novoPasseio["symbolWeather"] = symbolWeather
+        novoPasseio["recommendationDegree"] = recommendationDegree
+        novoPasseio["preciptationChance"] = preciptationChance
 
         saveItem(record: novoPasseio)
     }
@@ -85,7 +106,13 @@ class CloudKitCRUDViewModel: ObservableObject {
             guard let descricaoEvento = record["descricaoEvento"] as? String else{return}
             guard let weatherContent = record["weatherContent"] as? String else{return}
             guard let temperatura = record["temperatura"] as? Double else{return}
-             fetchedPasseios.append(PasseioModel(name: name, record: record, data: data, local: local, descricaoEvento: descricaoEvento, weatherContent: weatherContent, temperatura: temperatura))
+            guard let humidity = record["humidity"] as? Double else{return}
+            guard let uvIndex = record["uvIndex"] as? Int else{return}
+            guard let symbolWeather = record["symbolWeather"] as? String else{return}
+            guard let recommedationDegree = record["recommedationDegree"] as? Int else{return}
+            guard let preciptationChance = record["preciptationChance"] as? Double else{return}
+            
+             fetchedPasseios.append(PasseioModel(name: name, record: record, data: data, local: local, descricaoEvento: descricaoEvento, weatherContent: weatherContent, temperatura: temperatura, humidity: humidity, uvIndex: uvIndex, symbolWeather: symbolWeather, recommendationDegree: recommedationDegree, preciptationChance: preciptationChance))
             print("Fetched record: \(record.recordID.recordName)")
         }
         

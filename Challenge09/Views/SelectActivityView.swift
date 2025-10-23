@@ -20,6 +20,8 @@ struct SelectActivityView: View {
 
     let activityMoment: Activity
     let maxDaysToShow: Int
+    
+    @StateObject var crudVM = CloudKitCRUDViewModel()
 
     // MARK: - Estados
     @State private var bestDays: [WeatherResponse] = []
@@ -29,6 +31,7 @@ struct SelectActivityView: View {
 
     // MARK: - Corpo da View
     var body: some View {
+        
         VStack {
             Text("Atividade: \(activityMoment.name)")
                 .font(.title2)
@@ -130,9 +133,19 @@ struct SelectActivityView: View {
         }
     }
 
-    private func saveSelectedDay() {
+    func saveSelectedDay() {
         guard bestDays.indices.contains(selectedDayIndex) else { return }
         let selected = bestDays[selectedDayIndex]
+        
+        let newActivity2 = crudVM(
+            crudVM.text = activityMoment.name
+            crudVM.temperatura = selected.temperature
+            crudVM.preciptationChance = selected.precipitationChance
+            crudVM.humidity = selected.humidity
+            crudVM.uvIndex = selected.uvIndex
+            crudVM.symbolWeather = selected.symbolWeather??""
+            
+        )
 
         let newActivity = DaySelectedModel(
             nameActivity: activityMoment.name,
@@ -146,6 +159,9 @@ struct SelectActivityView: View {
             recommendationDegree: selected.recommendationDegree
         )
 
+        
+        
+        
         do {
             modelContext.insert(newActivity)
             try modelContext.save()
