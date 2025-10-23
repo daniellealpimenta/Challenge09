@@ -13,6 +13,8 @@ struct AddNewActivityView: View {
     @State private var maxDays = 1
     @State private var activityType: ActivityType = .walkingDog
     @State private var newActivity: Activity = .init(name: "", maxDays: 1, activityType: .walkingDog)
+    @State private var showSelectActivity = false
+    
     var body: some View {
         NavigationStack{
             Form {
@@ -49,15 +51,16 @@ struct AddNewActivityView: View {
                 //                    activityType = .walkingDog
                 //                    dismiss()
                 //                }
-                NavigationLink(
-                    destination: SelectActivityView(
-                        activityMoment: newActivity,
-                        //adicionei para puxar no SelectActivityView!!
-                        maxDaysToShow: newActivity.maxDays
-                    ),
-                    label: {
-                        Text("Ver previsões")
+                Button("Ver previsões") {
+                        showSelectActivity = true
                     }
+                    .disabled(newActivity.name.isEmpty)
+                
+            }.padding(.top, 20)
+            .sheet(isPresented: $showSelectActivity) {
+                SelectActivityView(
+                    activityMoment: newActivity,
+                    maxDaysToShow: newActivity.maxDays
                 )
             }
         }
