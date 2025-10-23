@@ -163,7 +163,6 @@ struct SelectActivityView: View {
 
 
         dismiss()
-        dismiss()
     }
 }
 

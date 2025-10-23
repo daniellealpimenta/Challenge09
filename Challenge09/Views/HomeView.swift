@@ -19,12 +19,42 @@ struct HomeView: View {
     @State private var isLoading = true
 
     @State private var showAddActivity = false
+    
+    @StateObject var cloudKitVM = CloudKitManager()
+    @StateObject var CRUDvm = CloudKitCRUDViewModel()
+    @StateObject var notificationVM = pushNotificationManager()
 
     @Query(sort: \DaySelectedModel.date, order: .reverse)
     private var allActivities: [DaySelectedModel]
 
     var body: some View {
         NavigationStack {
+            
+//            VStack{
+//                VStack{
+//                    TextField("Nome do role", text: $CRUDvm.text)
+//                        .frame(width: 280, height: 40)
+//                        .background(Color.gray)
+//                    TextField("Local: ", text: $CRUDvm.local)
+//                        .frame(width: 280, height: 40)
+//                        .background(Color.gray)
+//                    TextField("Temperatura: ",value: $CRUDvm.temperatura, format: .number)
+//                        .frame(width: 280, height: 40)
+//                        .background(Color.gray)
+//                }
+//                .padding()
+//                Button(action: {
+//                    CRUDvm.addItem()
+//                }, label: {
+//                    HStack{
+//                        Text("Adicionar")
+//                    }
+//                    .frame(width: 180, height: 40)
+//                    .background(Color.white)
+//                    .foregroundStyle(Color.black)
+//                })
+//            }
+            
             if isLoading {
                 VStack(spacing: 12) {
                     ProgressView()
@@ -152,6 +182,8 @@ struct HomeView: View {
             }
         }
         .onAppear {
+            notificationVM.requestNotificationPermission()
+            
             print("🗂 SwiftData carregou \(allActivities.count) atividades")
             for act in allActivities {
                 print(

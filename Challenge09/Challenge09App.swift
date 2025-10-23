@@ -5,6 +5,7 @@
 //  Created by Daniel Leal PImenta on 14/10/25.
 //
 
+import Foundation
 import SwiftUI
 import SwiftData
 
@@ -25,6 +26,9 @@ struct Challenge09App: App {
                 LocationDeniedView()
             }
                 
-        }.modelContainer(for: DaySelectedModel.self)
+        }.modelContainer(for: [DaySelectedModel.self],
+                         configurations: [
+                             ModelConfiguration("LocalConfig") // só local
+                         ])
     }
 }
