@@ -8,19 +8,38 @@
 import Foundation
 import SwiftData
 
-@Model class DaySelectedModel {
-    @Attribute(.unique) var id = UUID()
+@Model
+class DaySelectedModel {
+    var id = UUID()
     var nameActivity: String
     var date: String
     var temperature: Double
-    var preciptationChance: Double
+    var precipitationChance: Double
+    var humidity: Double
     var uvIndex: Int
+    var condition: String
+    var symbolWeather: String?
+    var recommendationDegree: Int
     
-    init(nameActivity: String, date: String, temperature: Double, preciptationChance: Double, uvIndex: Int) {
+    init(
+        nameActivity: String,
+        date: String,
+        temperature: Double,
+        precipitationChance: Double,
+        humidity: Double,
+        uvIndex: Int,
+        condition: String,
+        symbolWeather: String,
+        recommendationDegree: Int
+    ) {
         self.nameActivity = nameActivity
         self.date = date
         self.temperature = temperature
-        self.preciptationChance = preciptationChance
+        self.precipitationChance = precipitationChance
+        self.humidity = humidity
         self.uvIndex = uvIndex
+        self.condition = condition
+        self.symbolWeather = symbolWeather
+        self.recommendationDegree = recommendationDegree
     }
 }

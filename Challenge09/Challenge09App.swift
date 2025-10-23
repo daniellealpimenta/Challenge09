@@ -17,6 +17,7 @@ struct Challenge09App: App {
         WindowGroup {
             if locationManager.isAuthorized {
                 HomeView()
+                    .environment(locationManager)
                     .onAppear {
                     appDelegate.app = self
                 }
@@ -24,7 +25,6 @@ struct Challenge09App: App {
                 LocationDeniedView()
             }
                 
-        }.environment(locationManager)
-            .modelContainer(for: DaySelectedModel.self)
+        }.modelContainer(for: DaySelectedModel.self)
     }
 }
