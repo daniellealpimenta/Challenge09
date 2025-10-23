@@ -160,10 +160,19 @@ struct SelectActivityView: View {
         } catch {
             print("❌ Erro ao salvar: \(error.localizedDescription)")
         }
-
-
-        dismiss()
-        dismiss()
+        
+        
+        // Feito para fechar as modais
+        var window: UIWindow? {
+            guard let scene = UIApplication.shared.connectedScenes.first,
+                  let windowSceneDelegate = scene.delegate as? UIWindowSceneDelegate,
+                  let window = windowSceneDelegate.window else {
+                return nil
+            }
+            return window
+        }
+        window?.rootViewController?.dismiss(animated: true, completion: nil)
+        
     }
 }
 
