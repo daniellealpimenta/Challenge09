@@ -6,38 +6,32 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AllActivitiesView: View {
-    @Binding var allActivities: [Activity]
-    
+    @Query(FetchDescriptor<DaySelectedModel>(sortBy: [SortDescriptor(\.date, order: .reverse)])) private var activities: [DaySelectedModel]
+
     var body: some View {
         List {
-            ForEach(allActivities) { activity in
-                Section {
+            ForEach(activities, id: \.id) { activity in
+                VStack{
                     HStack {
-                        Text("Nome: ")
+                        Text("Date:")
                         Spacer()
-                        Text(activity.name)
+                        Text(activity.date)
                     }
-                    
                     HStack {
-                        Text("Tipo: ")
+                        Text("Nome:")
                         Spacer()
-                        Text(activity.activityType.rawValue)
+                        Text(activity.nameActivity)
                     }
                 }
             }
         }
-        
-        .navigationTitle("Todos rolês")
     }
 }
+
 #Preview {
-    AllActivitiesView(
-            allActivities: .constant([
-                Activity(name: "a", maxDays: 2, activityType: .beachDay)
-            ])
-        )
+    AllActivitiesView()
+        .modelContainer(for: DaySelectedModel.self, inMemory: true)
 }
-
-

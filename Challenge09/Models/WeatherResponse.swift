@@ -16,15 +16,19 @@ struct WeatherResponse: Codable, Identifiable {
     var precipitationChance: Double
     var humidity: Double
     var uvIndex: Int
-    var recomendationDegree: Int
+    var condition: String
+    var symbolWeather: String?
+    var recommendationDegree: Int
     
-    public init(date: String, temperature: Double, precipitationChance: Double, humidity: Double, uvIndex: Int, recomendationDegree: Int) {
+    public init(date: String, temperature: Double, precipitationChance: Double, humidity: Double, uvIndex: Int, condition: String, symbolWeather: String, recommendationDegree: Int) {
         self.date = date
         self.temperature = temperature
         self.precipitationChance = precipitationChance
         self.humidity = humidity
         self.uvIndex = uvIndex
-        self.recomendationDegree = recomendationDegree
+        self.condition = condition
+        self.symbolWeather = symbolWeather
+        self.recommendationDegree = recommendationDegree
     }
 }
 

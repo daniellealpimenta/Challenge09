@@ -23,9 +23,6 @@ struct ContentView: View {
     @State private var weather: Weather?
     @State private var isLoading = false
     
-    @State var allActivities: [Activity] = []
-    var activity: Activity = Activity(name: "", maxDays: 2, activityType: .beachDay,)
-    
     var body: some View {
         NavigationStack {
             VStack {
@@ -58,17 +55,18 @@ struct ContentView: View {
                             AttributionView()
                             Text(weatherManager.weatherDays.count.description + " dias de previsão")
                             NotificationButton()
+                            HomeView()
                         }
 
-                        //if let bestDays {
-                        //    RecommendedDaysView(bestDays: bestDays)
-                        //}
+                        if let bestDays {
+                            RecommendedDaysView(bestDays: bestDays)
+                        }
                         
-                        NavigationLink(destination: AddNewActivity(allActivities: $allActivities, newActivity: activity), label: {
+                        NavigationLink(destination: AddNewActivityView(), label: {
                             Text("Adicionar novo rolê")
                         })
                         
-                        NavigationLink(destination: AllActivitiesView(allActivities: $allActivities), label: {
+                        NavigationLink(destination: AllActivitiesView(), label: {
                             Text("Todos os rolês")
                         })
                     }
@@ -89,17 +87,17 @@ struct ContentView: View {
         
           .task(id: weatherManager.weatherDays.count) {
               if !weatherManager.weatherDays.isEmpty {
-                  let recomendations =  await recommendedDaysManager.calculateRecommendations(weather: weatherManager.weatherDays)
+                  let recomendations =  await recommendedDaysManager.calculateRecommendations(weather: weatherManager.weatherDays, activity: Activity.init(name: "Exemplo - PRAIA", maxDays: 10, activityType: .picnic))
 
                   if !recomendations.isEmpty {
                       bestDays = await recommendedDaysManager.generateWeatherResponses(weather: weatherManager.weatherDays, recommendationDays: recomendations)
 
                   }
 
-  //                print("✅ Foram carregados \(weatherManager.weatherDays.count) dias:")
-  //                for day in weatherManager.weatherDays {
-  //                    print("📅 Date: \(day.dateWeather) | 🌡️ Temperatura: \(day.highestTemperature)°C | ☔️ Chance de chuva: \(day.precipitationChance)% | 🔆 UV Index: \(day.uvIndex) | 🌧️ Humidade: \(day.maximumHumidity)%")
-  //                }
+//                  print("✅ Foram carregados \(weatherManager.weatherDays.count) dias:")
+//                  for day in weatherManager.weatherDays {
+//                      print("📅 Date: \(day.dateWeather) | 🌡️ Temperatura: \(day.highestTemperature)°C | ☔️ Chance de chuva: \(day.precipitationChance)% | 🔆 UV Index: \(day.uvIndex) | 🌧️ Humidade: \(day.maximumHumidity)%")
+//                  }
               }
         }
     }
@@ -114,7 +112,7 @@ struct ContentView: View {
     }
 }
 
-//#Preview {
-//    ContentView()
-//        .environment(LocationManager())
-//}
+#Preview {
+    ContentView()
+        .environment(LocationManager())
+}

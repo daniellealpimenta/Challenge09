@@ -16,7 +16,7 @@ struct Challenge09App: App {
     var body: some Scene {
         WindowGroup {
             if locationManager.isAuthorized {
-                ContentView()
+                HomeView()
                     .onAppear {
                     appDelegate.app = self
                 }
