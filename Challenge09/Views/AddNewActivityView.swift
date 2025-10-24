@@ -9,17 +9,26 @@ import SwiftUI
 
 struct AddNewActivityView: View {
     @Environment(\.dismiss) var dismiss
+    
+    var onActivityAdded: (() -> Void)? = nil
+    
     @State private var name = ""
     @State private var maxDays = 1
     @State private var activityType: ActivityType = .walkingDog
-    @State private var newActivity: Activity = .init(name: "", maxDays: 1, activityType: .walkingDog)
+    @State private var newActivity: Activity = .init(name: "", maxDays: 1, activityType: .walkingDog, local: "")
     @State private var showSelectActivity = false
+    @State private var local: String = ""
+    @State private var descriptionEvent: String = ""
     
     var body: some View {
         NavigationStack{
             Form {
                 Section("Como deseja chamar esse rolê?") {
                     TextField("Ex: Parque com os amigos", text: $newActivity.name)
+                }
+                
+                Section("Qual será o local?") {
+                    TextField("Ex: Casa do Daniel", text: $newActivity.local)
                 }
                 
                 Section("Em até quantos dias?") {
@@ -58,9 +67,15 @@ struct AddNewActivityView: View {
                 
             }.padding(.top, 20)
             .sheet(isPresented: $showSelectActivity) {
+                // 👇 Passa a callback pra SelectActivityView
                 SelectActivityView(
                     activityMoment: newActivity,
-                    maxDaysToShow: newActivity.maxDays
+                    maxDaysToShow: newActivity.maxDays,
+                    onSaved: {
+                        // Quando o rolê for salvo:
+                        onActivityAdded?() // avisa a Home pra recarregar
+                        dismiss()          // fecha o AddNewActivityView
+                    }
                 )
             }
         }

@@ -9,6 +9,7 @@ import Foundation
 import FoundationModels
 
 struct FoundationManager {
+    
     private let instructions = """
         You are a weather companion. Write a short, friendly and uplifting message based on today’s weather. Respond only with the final message, no explanations.
         """
@@ -17,6 +18,7 @@ struct FoundationManager {
     public func generateWeatherMessage(for input: String) async throws -> String {
         // Verifica a disponibilidade no dispositivo
         guard SystemLanguageModel.default.isAvailable else {
+            print("o seu sistema nao ta funcionando")
             return input
         }
         
@@ -32,6 +34,7 @@ struct FoundationManager {
         
         // Obtem o conteúdo do texto retornado pelo modelo
         let response = try await session.respond(to: input, options: options)
+        print("A resposta é: \(response.content)")
         return response.content
         
     }

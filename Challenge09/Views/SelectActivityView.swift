@@ -20,6 +20,10 @@ struct SelectActivityView: View {
 
     let activityMoment: Activity
     let maxDaysToShow: Int
+    
+    @StateObject var crudVM = CloudKitCRUDViewModel()
+    
+    var onSaved: (() -> Void)? = nil
 
     // MARK: - Estados
     @State private var bestDays: [WeatherResponse] = []
@@ -29,6 +33,7 @@ struct SelectActivityView: View {
 
     // MARK: - Corpo da View
     var body: some View {
+        
         VStack {
             Text("Atividade: \(activityMoment.name)")
                 .font(.title2)
@@ -57,7 +62,10 @@ struct SelectActivityView: View {
                                     Text("🌧️ Chuva: \((day.precipitationChance * 100).formatted(.number.precision(.fractionLength(0))))%")
                                     Text("☀️ UV: \(day.uvIndex)")
                                     Text("💧 Umidade: \((day.humidity * 100).formatted(.number.precision(.fractionLength(0))))%")
-                                    Text("☁️ Condição: \(day.condition.capitalized)")
+                                    
+                                    let condicaoTraduzida = TradutorCondicaoClimatica(rawValue: day.condition.capitalized)
+                                    
+                                    Text("☁️ Condição: \(condicaoTraduzida?.traducao ?? day.condition.capitalized)")
                                 }
                                 Spacer()
                                 if selectedDayIndex == index {
@@ -130,49 +138,52 @@ struct SelectActivityView: View {
         }
     }
 
-    private func saveSelectedDay() {
+    func saveSelectedDay() {
         guard bestDays.indices.contains(selectedDayIndex) else { return }
         let selected = bestDays[selectedDayIndex]
+        
+       
+        crudVM.name = activityMoment.name
+        crudVM.date = selected.date
+        crudVM.local = activityMoment.local
+        crudVM.descricaoEvento = activityMoment.activityType.rawValue
+        crudVM.temperature = selected.temperature
+        crudVM.humidity = selected.humidity
+        crudVM.uvIndex = selected.uvIndex
+        crudVM.symbolWeather = selected.symbolWeather ?? "cloud.fill"
+        crudVM.condition = selected.condition
+        crudVM.recommendationDegree = selected.recommendationDegree
+        crudVM.preciptationChance = selected.precipitationChance
 
-        let newActivity = DaySelectedModel(
-            nameActivity: activityMoment.name,
-            date: selected.date,
-            temperature: selected.temperature,
-            precipitationChance: selected.precipitationChance,
-            humidity: selected.humidity,
-            uvIndex: selected.uvIndex,
-            condition: selected.condition,
-            symbolWeather: selected.symbolWeather ?? "",
-            recommendationDegree: selected.recommendationDegree
-        )
+//        let newActivity = DaySelectedModel(
+//            nameActivity: activityMoment.name,
+//            date: selected.date,
+//            temperature: selected.temperature,
+//            precipitationChance: selected.precipitationChance,
+//            humidity: selected.humidity,
+//            uvIndex: selected.uvIndex,
+//            condition: selected.condition,
+//            symbolWeather: selected.symbolWeather ?? "",
+//            recommendationDegree: selected.recommendationDegree
+//        )
+        
+        crudVM.addItem()
 
-        do {
-            modelContext.insert(newActivity)
-            try modelContext.save()
-
-            // Testa persistência real
-            let fetch = FetchDescriptor<DaySelectedModel>()
-            let results = try modelContext.fetch(fetch)
-            print("📊 SwiftData contém agora \(results.count) registros:")
-            for act in results {
-                print("  → \(act.nameActivity) em \(act.date)")
-            }
-        } catch {
-            print("❌ Erro ao salvar: \(error.localizedDescription)")
+//        var window: UIWindow? {
+//            guard let scene = UIApplication.shared.connectedScenes.first,
+//                  let windowSceneDelegate = scene.delegate as? UIWindowSceneDelegate,
+//                  let window = windowSceneDelegate.window else {
+//                return nil
+//            }
+//            return window
+//        }
+//        window?.rootViewController?.dismiss(animated: true, completion: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            onSaved?()  
+            dismiss()
         }
-        
-        
-        // Feito para fechar as modais
-        var window: UIWindow? {
-            guard let scene = UIApplication.shared.connectedScenes.first,
-                  let windowSceneDelegate = scene.delegate as? UIWindowSceneDelegate,
-                  let window = windowSceneDelegate.window else {
-                return nil
-            }
-            return window
-        }
-        window?.rootViewController?.dismiss(animated: true, completion: nil)
-        
+      
     }
 }
 

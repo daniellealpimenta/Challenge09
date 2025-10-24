@@ -12,7 +12,7 @@ struct Activity: Identifiable {
     var name: String
     var maxDays: Int
     var activityType: ActivityType
-    
+    var local: String    
 }
 
 enum ActivityType: String, CaseIterable, Codable, Hashable {

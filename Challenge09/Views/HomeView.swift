@@ -19,6 +19,10 @@ struct HomeView: View {
     @State private var isLoading = true
 
     @State private var showAddActivity = false
+    
+    @StateObject var cloudKitVM = CloudKitManager()
+    @StateObject var CRUDvm = CloudKitCRUDViewModel()
+    @StateObject var notificationVM = pushNotificationManager()
 
     @Query(sort: \DaySelectedModel.date, order: .reverse)
     private var allActivities: [DaySelectedModel]
@@ -90,9 +94,14 @@ struct HomeView: View {
                                 }
                             }
                             .padding(.top, 10)
-                            .sheet(isPresented: $showAddActivity) {
+                            .sheet(isPresented: $showAddActivity, onDismiss: {
+                                Task {
+                                    CRUDvm.fetchItems() 
+                                }
+                            }) {
                                 AddNewActivityView()
                             }
+
 
                             HStack {
                                 Text("Rolês marcados")
@@ -110,12 +119,13 @@ struct HomeView: View {
                                 //                                }
                             }
                             .padding(.horizontal, 25)
-                            VStack(spacing: 16) {
-                                ForEach(allActivities) { activity in
-                                    ActivityCard(
-                                        from: activity,
-                                        newSuggestions: false
-                                    )
+                            ScrollView{
+                                VStack(spacing: 16) {
+                                    ForEach(CRUDvm.passeios, id:\.self) { activity in
+                                        NavigationLink(destination: DescribeActivityView(passeio: activity), label: {
+                                            ActivityCard(day: activity.date, activityName: activity.name, degrees: activity.recommendationDegree, temperature: activity.temperature, precipitation: activity.precipitationChance, newSuggestions: false, condition: activity.condition, symbolName: activity.symbolWeather, humidity: activity.humidity)
+                                        })
+                                    }
                                 }
                             }
                             .padding(.bottom, 30)
@@ -152,6 +162,8 @@ struct HomeView: View {
             }
         }
         .onAppear {
+            notificationVM.requestNotificationPermission()
+            
             print("🗂 SwiftData carregou \(allActivities.count) atividades")
             for act in allActivities {
                 print(
