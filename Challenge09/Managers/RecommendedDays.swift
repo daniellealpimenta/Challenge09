@@ -118,11 +118,11 @@ struct RecommendedDays {
     }
 
     
-    public func generateWeatherResponses(weather: [WeatherModel], recommendationDays: [(recommendation: Int, date: String)]) async -> [WeatherResponse] {
+    public func generateWeatherResponses(weather: [WeatherModel], recommendationDays: [(recommendation: Int, date: String)],daysCount: Int) async -> [WeatherResponse] {
         
         var weatherResponses: [WeatherResponse] = []
         
-        let topDays = recommendationDays.sorted { $0.recommendation > $1.recommendation }.prefix(3)
+        let topDays = recommendationDays.sorted { $0.recommendation > $1.recommendation }.prefix(daysCount)
         
 //        for i in topDays {
 //            print("Recommendation: \(i.recommendation), Date: \(i.date)")

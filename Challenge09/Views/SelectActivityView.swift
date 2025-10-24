@@ -10,187 +10,169 @@ import SwiftData
 import CoreLocation
 
 struct SelectActivityView: View {
-    
-        @State private var selectedDay: Int = 0
-        @State private var weatherData: [WeatherModel] = []
-        @State private var isLoading = true
-        @State private var errorMessage: String?
-    
-        @State private var recommendedDaysCount: Int = 0
 
-        @State private var locationManager = LocationManager()
-    
-        @Environment(\.modelContext) private var modelContext
+    // MARK: - Dependências principais
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
 
-        let activityMoment: Activity
-        let maxDaysToShow: Int
+    let weatherManager = WeatherManager.shared
+    let recommendedDaysManager = RecommendedDays.shared
 
+    let activityMoment: Activity
+    let maxDaysToShow: Int
     
+    @StateObject var crudVM = CloudKitCRUDViewModel()
+
+    // MARK: - Estados
+    @State private var bestDays: [WeatherResponse] = []
+    @State private var selectedDayIndex: Int = 0
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+
+    // MARK: - Corpo da View
     var body: some View {
-            VStack {
-                Text("Nome do role: \(activityMoment.name)")
-                    .font(.title2)
-                    .padding(.bottom, 10)
+        
+        VStack {
+            Text("Atividade: \(activityMoment.name)")
+                .font(.title2)
+                .padding(.bottom, 10)
 
-                if isLoading {
-                    ProgressView("Buscando clima")
-                        .task {
-                            await loadWeather()
-                        }
-                } else if let errorMessage = errorMessage {
-                    Text("Erro: \(errorMessage)")
-                        .foregroundColor(.red)
-                        .padding()
-                } else if weatherData.isEmpty {
-                    Text("Nenhuma previsão disponível")
-                } else {
-                    ScrollView {
-                        ForEach(Array(weatherData.enumerated()), id: \.offset) { index, data in
-                            Button {
-                                selectedDay = index
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        Text("Data: \(data.dateWeather)")
-                                            .font(.headline)
-                                        Text("Temperatura Máxima: \(Int(data.highestTemperature))° ")
-                                        Text("Temperatura Mínima: \(Int(data.lowestTemperature))°")
-                                        Text("Chance de chuva: \((data.precipitationChance * 100).formatted(.number.precision(.fractionLength(0))))%")
-                                        Text("UV: \(data.uvIndex)")
-                                    }
-                                    Spacer()
-                                    if selectedDay == index {
-                                        Image(systemName: "checkmark.circle.fill")
-                                            .foregroundColor(.white)
-                                    }
+            if isLoading {
+                ProgressView("Analisando previsões...")
+            } else if let errorMessage {
+                Text("Erro: \(errorMessage)")
+                    .foregroundColor(.red)
+                    .padding()
+            } else if bestDays.isEmpty {
+                Text("Nenhuma previsão disponível")
+                    .foregroundColor(.gray)
+            } else {
+                ScrollView {
+                    ForEach(Array(bestDays.enumerated()), id: \.offset) { index, day in
+                        Button {
+                            selectedDayIndex = index
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("📅 \(day.date)")
+                                        .font(.headline)
+                                    Text("🌡️ Máxima: \(Int(day.temperature))°C")
+                                    Text("🌧️ Chuva: \((day.precipitationChance * 100).formatted(.number.precision(.fractionLength(0))))%")
+                                    Text("☀️ UV: \(day.uvIndex)")
+                                    Text("💧 Umidade: \((day.humidity * 100).formatted(.number.precision(.fractionLength(0))))%")
+                                    Text("☁️ Condição: \(day.condition.capitalized)")
                                 }
-                                .padding()
-                                .background(index < recommendedDaysCount ? Color.blue: Color.gray.opacity(0.1))
-                                .foregroundColor(index < recommendedDaysCount ? .white : .primary)
-                                .cornerRadius(12)
+                                Spacer()
+                                if selectedDayIndex == index {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.white)
+                                }
                             }
+                            .padding()
+                            .background(index == 0 ? Color.green : (index < 3 ? Color.blue : Color.gray.opacity(0.2)))
+                            .foregroundColor(index < 3 ? .white : .primary)
+                            .cornerRadius(12)
                         }
                     }
-
-                    Text("Dia escolhido: \(weatherData[selectedDay].dateWeather)")
-                        .padding(.top, 15)
-
-                    Button {
-                        saveSelectedDay()
-                    } label: {
-                        Text("Salvar role")
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                    .padding(.top, 10)
                 }
-            }
-            .padding()
-            .onAppear {
-                locationManager.starLocationServices()
+
+                // Dia selecionado
+                Text("Selecionado: \(bestDays[selectedDayIndex].date)")
+                    .padding(.top, 15)
+
+                Button {
+                    saveSelectedDay()
+                } label: {
+                    Text("Salvar rolê")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding(.top, 10)
             }
         }
+        .padding()
+        .task {
+            await loadRecommendations()
+        }
+    }
 
-    private func loadWeather() async {
-        guard let location = locationManager.userlocation else {
+    // MARK: - Funções auxiliares
+    private func loadRecommendations() async {
+        let allDays = weatherManager.weatherDays
+
+        guard !allDays.isEmpty else {
             await MainActor.run {
-                isLoading = false
-                errorMessage = "Não foi possível obter sua localização."
+                self.errorMessage = "Não foi possível carregar os dados climáticos. Volte à tela inicial."
+                self.isLoading = false
             }
             return
         }
 
-        let weather = await WeatherManager.shared.fetchWeather(for: location)
-        
-        await MainActor.run {
-            if weather != nil {
-                let allDays = WeatherManager.shared.weatherDays
-                let daysToConsider = Array(allDays.prefix(maxDaysToShow + 1))
-                
-                Task {
-                    let recommendations = await RecommendedDays.shared.calculateRecommendations(weather: daysToConsider)
-                    let topRecommendations = recommendations.sorted { $0.recommendation > $1.recommendation }.prefix(3)
-                    let topDates = Set(topRecommendations.map { $0.date })
-                    let recommendedDaysData = topRecommendations.compactMap { recommendation in
-                        daysToConsider.first { $0.dateWeather == recommendation.date }
-                    }
+        // Considera apenas o limite definido de dias
+        let limitedDays = Array(allDays.prefix(maxDaysToShow))
 
-                    self.recommendedDaysCount = recommendedDaysData.count
-                    
-                    let remainingDaysData = daysToConsider.filter { !topDates.contains($0.dateWeather) }
-                    self.weatherData = recommendedDaysData + remainingDaysData
-                    self.isLoading = false
-                }
-            } else {
-                errorMessage = "Falha ao buscar dados do clima."
-                self.isLoading = false
-            }
-        }
-    }
-    
-    
-    private func saveSelectedDay() {
-        let selected = weatherData[selectedDay]
-        let newActivity = DaySelectedModel(
-            nameActivity: activityMoment.name,
-            date: selected.dateWeather,
-            temperature: selected.highestTemperature,
-            preciptationChance: selected.precipitationChance,
-            uvIndex: selected.uvIndex
+        // Gera recomendações com base na atividade
+        let recommendations = await recommendedDaysManager.calculateRecommendations(
+            weather: limitedDays,
+            activity: activityMoment
         )
 
-        modelContext.insert(newActivity)
-        try? modelContext.save()
-        print("Salvo: \(newActivity.nameActivity) - \(newActivity.date)")
+        // Gera os objetos WeatherResponse ordenados por melhor recomendação
+        let responses = await recommendedDaysManager.generateWeatherResponses(
+            weather: limitedDays,
+            recommendationDays: recommendations,
+            daysCount: maxDaysToShow
+        )
+
+        await MainActor.run {
+            self.bestDays = responses
+            self.isLoading = false
+        }
     }
+
+    func saveSelectedDay() {
+        guard bestDays.indices.contains(selectedDayIndex) else { return }
+        let selected = bestDays[selectedDayIndex]
+        
+       
+        crudVM.name = activityMoment.name
+        crudVM.date = selected.date
+        crudVM.local = activityMoment.local
+        crudVM.descricaoEvento = activityMoment.activityType.rawValue
+        crudVM.temperature = selected.temperature
+        crudVM.humidity = selected.humidity
+        crudVM.uvIndex = selected.uvIndex
+        crudVM.symbolWeather = selected.symbolWeather ?? "cloud.fill"
+        crudVM.condition = selected.condition
+        crudVM.recommendationDegree = selected.recommendationDegree
+        crudVM.preciptationChance = selected.precipitationChance
+
+//        let newActivity = DaySelectedModel(
+//            nameActivity: activityMoment.name,
+//            date: selected.date,
+//            temperature: selected.temperature,
+//            precipitationChance: selected.precipitationChance,
+//            humidity: selected.humidity,
+//            uvIndex: selected.uvIndex,
+//            condition: selected.condition,
+//            symbolWeather: selected.symbolWeather ?? "",
+//            recommendationDegree: selected.recommendationDegree
+//        )
+
+        
+        
+        
+        do {
+            crudVM.addItem()
+        } catch {
+            print("❌ Erro ao salvar: \(error.localizedDescription)")
+        }
+
+
+        dismiss()
     }
+}
 
-
-//var body: some View {
-//
-//        VStack{
-//            Text("Nome do role: \(activityMoment.name)")
-//            ForEach(Array(mockWeatherData.enumerated()), id: \.offset) {index,data in
-//
-//                Button(action: {
-//                    selectedDay = index
-//                    print(mockWeatherData[selectedDay].humidity)
-//                }, label: {
-//                    HStack{
-//                        VStack{
-//                            Text("Dia: \(data.date)")
-//                            Text("Temperatura: \(data.temperature)")
-//                            Text("Chance de chuva: \(data.precipitationChance)")
-//                        }
-//                    }.padding()
-//                })
-//            }
-//            Text("O dia que eu escolhi foi: \(mockWeatherData[selectedDay].date)")
-//            Button(action:{
-//                let newAcitivity = DaySelectedModel(
-//                    nameActivity: activityMoment.name,
-//                    date: mockWeatherData[selectedDay].date,
-//                    temperature: mockWeatherData[selectedDay].temperature,
-//                    preciptationChance: mockWeatherData[selectedDay].precipitationChance,
-//                    uvIndex: mockWeatherData[selectedDay].uvIndex)
-//
-//                modelContext.insert(newAcitivity)
-//                try? modelContext.save()
-//
-//                print("Foi salvo: \(newAcitivity.nameActivity)")
-//            }, label: {
-//                Text("Salvar role")
-//            })
-//        }
-//
-//
-//    }
-//
-//}
-
-//#Preview {
-//    SelectActivityView()
-//}
