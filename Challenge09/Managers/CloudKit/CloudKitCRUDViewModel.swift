@@ -58,7 +58,7 @@ class CloudKitCRUDViewModel: ObservableObject {
     
     @Published var passeios: [PasseioModel] = []
     
-    init(){
+    init() {
         fetchItems()
     }
 
@@ -83,7 +83,7 @@ class CloudKitCRUDViewModel: ObservableObject {
         CKContainer.default().publicCloudDatabase.save(record) {
             returnedRecord,
             returnedError in
-            print("record: \(returnedRecord)")
+            print("record: \(String(describing: returnedRecord))")
 
         }
     }

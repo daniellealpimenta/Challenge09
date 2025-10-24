@@ -94,9 +94,14 @@ struct HomeView: View {
                                 }
                             }
                             .padding(.top, 10)
-                            .sheet(isPresented: $showAddActivity) {
+                            .sheet(isPresented: $showAddActivity, onDismiss: {
+                                Task {
+                                    CRUDvm.fetchItems() 
+                                }
+                            }) {
                                 AddNewActivityView()
                             }
+
 
                             HStack {
                                 Text("Rolês marcados")

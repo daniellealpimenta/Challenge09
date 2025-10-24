@@ -87,6 +87,23 @@ struct DescribeActivityView: View {
                 .background(.ultraThinMaterial)
                 .cornerRadius(20)
                 .shadow(color: .white.opacity(0.1), radius: 5, x: 0, y: 2)
+                
+                if let message {
+                    HStack {
+                        Image(systemName: "tshirt.fill")
+                            .font(.body)
+                            .foregroundStyle(.white)
+                        Text("\(message)")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                    }.frame(width: 300)
+                        .padding()
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(20)
+                        .shadow(color: .green.opacity(0.2), radius: 5, x: 0, y: 2)
+                }
+
+                
                 VStack {
                     Button(
                         action: {
@@ -151,10 +168,7 @@ struct DescribeActivityView: View {
                     )
 
                 }
-                if let message {
-                    Text("A roupa ideal é: \(message)")
-                }
-
+                
             }
 
         }

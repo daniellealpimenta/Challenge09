@@ -22,6 +22,8 @@ struct SelectActivityView: View {
     let maxDaysToShow: Int
     
     @StateObject var crudVM = CloudKitCRUDViewModel()
+    
+    var onSaved: (() -> Void)? = nil
 
     // MARK: - Estados
     @State private var bestDays: [WeatherResponse] = []
@@ -60,7 +62,10 @@ struct SelectActivityView: View {
                                     Text("🌧️ Chuva: \((day.precipitationChance * 100).formatted(.number.precision(.fractionLength(0))))%")
                                     Text("☀️ UV: \(day.uvIndex)")
                                     Text("💧 Umidade: \((day.humidity * 100).formatted(.number.precision(.fractionLength(0))))%")
-                                    Text("☁️ Condição: \(day.condition.capitalized)")
+                                    
+                                    let condicaoTraduzida = TradutorCondicaoClimatica(rawValue: day.condition.capitalized)
+                                    
+                                    Text("☁️ Condição: \(condicaoTraduzida?.traducao ?? day.condition.capitalized)")
                                 }
                                 Spacer()
                                 if selectedDayIndex == index {
@@ -161,18 +166,24 @@ struct SelectActivityView: View {
 //            symbolWeather: selected.symbolWeather ?? "",
 //            recommendationDegree: selected.recommendationDegree
 //        )
+        
+        crudVM.addItem()
 
+//        var window: UIWindow? {
+//            guard let scene = UIApplication.shared.connectedScenes.first,
+//                  let windowSceneDelegate = scene.delegate as? UIWindowSceneDelegate,
+//                  let window = windowSceneDelegate.window else {
+//                return nil
+//            }
+//            return window
+//        }
+//        window?.rootViewController?.dismiss(animated: true, completion: nil)
         
-        
-        
-        do {
-            crudVM.addItem()
-        } catch {
-            print("❌ Erro ao salvar: \(error.localizedDescription)")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            onSaved?()  
+            dismiss()
         }
 
-
-        dismiss()
     }
 }
 
