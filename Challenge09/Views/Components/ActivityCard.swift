@@ -19,39 +19,6 @@ struct ActivityCard: View {
     let symbolName: String?
     let humidity: Int
 
-    // Conveniência para criar a partir de um DaySelectedModel (SwiftData)
-    init(
-        day: String,
-        activityName: String,
-        degrees: Int,
-        precipitation: Double = 0,
-        newSuggestions: Bool = false,
-        condition: String? = nil,
-        symbolName: String? = nil,
-        humidity: Double
-    ) {
-        self.day = day
-        self.activityName = activityName
-        self.degrees = degrees
-        self.precipitation = precipitation
-        self.newSuggestions = newSuggestions
-        self.condition = condition
-        self.symbolName = symbolName
-        self.humidity = Int(humidity)
-    }
-
-    init(from model: DaySelectedModel, newSuggestions: Bool = false) {
-
-        self.day = model.date
-        self.activityName = model.nameActivity
-        self.degrees = Int(model.temperature.rounded())
-        self.precipitation = model.precipitationChance <= 1 ? model.precipitationChance * 100 : model.precipitationChance
-        self.newSuggestions = newSuggestions
-        self.condition = model.condition
-        self.symbolName = model.symbolWeather
-        self.humidity = Int(model.humidity * 100)
-    }
-
     private var precipitationPercentString: String {
         let percent = max(0, min(100, precipitation))
         return String(format: "%.0f", percent) + "%"
@@ -152,6 +119,6 @@ struct ActivityCard: View {
     ZStack {
         LinearGradient(colors: [.blue, .cyan], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
-        ActivityCard(day: "", activityName: "Piquenique", degrees: 27, precipitation: 0.05, newSuggestions: true, condition: "partlyCloudy", humidity: 20.02)
+        ActivityCard(day: "", activityName: "Piquenique", degrees: 27, precipitation: 0.05, newSuggestions: true, condition: "partlyCloudy", symbolName: "cloud.fill", humidity: 20)
     }
 }

@@ -14,7 +14,7 @@ import UIKit
 @MainActor
 class pushNotificationManager: ObservableObject {
     
-    private let privateDB = CKContainer.default().privateCloudDatabase
+    private let publicDB = CKContainer.default().publicCloudDatabase
     
     // Pedir permissão de notificações
     func requestNotificationPermission() {
@@ -37,7 +37,7 @@ class pushNotificationManager: ObservableObject {
     func subscribeNotification(){
         let predicate = NSPredicate(value: true)
         
-        let subscription = CKQuerySubscription(recordType: "Passeios", predicate: predicate, subscriptionID: "passeio_added_to_database", options: .firesOnRecordCreation)
+        let subscription = CKQuerySubscription(recordType: "Roles", predicate: predicate, subscriptionID: "role_added_to_database", options: .firesOnRecordCreation)
         
         let notification = CKSubscription.NotificationInfo()
         notification.title = "Novo passeio adicionado"

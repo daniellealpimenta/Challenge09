@@ -11,64 +11,67 @@ import Combine
 import Foundation
 
 struct PasseioModel: Hashable {
-    let name: String
     let record: CKRecord
-    let data: Date
     let local: String
     let descricaoEvento: String
-    let weatherContent: String
-    let temperatura: Double
+    let name: String
+    let date: String
+    let temperature: Double
+    var precipitationChance: Double
     let humidity: Double
     let uvIndex: Int
+    var condition: String
     let symbolWeather: String
     let recommendationDegree: Int
-    let preciptationChance: Double
     
 
     func toCKRecord() -> CKRecord {
-        let record = CKRecord(recordType: "Passeio")
+        let record = CKRecord(recordType: "Roles")
         record["name"] = name as CKRecordValue
-        record["data"] = data as CKRecordValue
+        record["date"] = date as CKRecordValue
         record["local"] = local as CKRecordValue
         record["descricaoEvento"] = descricaoEvento as CKRecordValue
-        record["weatherContent"] = weatherContent as CKRecordValue
-        record["temperatura"] = weatherContent as CKRecordValue
-        record["humidity"] = weatherContent as CKRecordValue
-        record["uvIndex"] = weatherContent as CKRecordValue
-        record["symbolWeather"] = weatherContent as CKRecordValue
-        record["recommendationDegree"] = weatherContent as CKRecordValue
-        record["preciptationChance"] = weatherContent as CKRecordValue
+        record["temperature"] = temperature as CKRecordValue
+        record["humidity"] = humidity as CKRecordValue
+        record["uvIndex"] = uvIndex as CKRecordValue
+        record["condition"] = condition as CKRecordValue
+        record["symbolWeather"] = symbolWeather as CKRecordValue
+        record["recommendationDegree"] = recommendationDegree as CKRecordValue
+        record["preciptationChance"] = precipitationChance as CKRecordValue
         return record
     }
 }
 
 class CloudKitCRUDViewModel: ObservableObject {
 
-    @Published var text: String = ""
+    @Published var name: String = ""
+    @Published var date: String = ""
     @Published var local: String = ""
-    @Published var passeios: [PasseioModel] = []
-    @Published var temperatura: Double = 0.0
+    @Published var descricaoEvento: String = ""
+    @Published var temperature: Double = 0.0
     @Published var humidity: Double = 0.0
     @Published var uvIndex: Int = 0
     @Published var symbolWeather: String = ""
+    @Published var condition: String = ""
     @Published var recommendationDegree: Int = 0
     @Published var preciptationChance: Double = 0.0
+    
+    @Published var passeios: [PasseioModel] = []
     
     init(){
         fetchItems()
     }
 
     func addItem() {
-        let novoPasseio = CKRecord(recordType: "Passeios")
-        novoPasseio["name"] = text
+        let novoPasseio = CKRecord(recordType: "Roles")
+        novoPasseio["name"] = name
         novoPasseio["local"] = local
-        let data = Date.now
-        novoPasseio["data"] = data
-        novoPasseio["descricaoEvento"] = "Passeio ao ar livre"
-        novoPasseio["weatherContent"] = "parcialmente nublado"
-        novoPasseio["temperatura"] = temperatura
+        novoPasseio["data"] = date
+        novoPasseio["descricaoEvento"] = descricaoEvento
+        novoPasseio["temperatura"] = temperature
         novoPasseio["humidity"] = humidity
         novoPasseio["uvIndex"] = uvIndex
+        novoPasseio["condition"] = condition
         novoPasseio["symbolWeather"] = symbolWeather
         novoPasseio["recommendationDegree"] = recommendationDegree
         novoPasseio["preciptationChance"] = preciptationChance
@@ -82,16 +85,12 @@ class CloudKitCRUDViewModel: ObservableObject {
             returnedError in
             print("record: \(returnedRecord)")
 
-            DispatchQueue.main.async {
-                self.text = ""
-                self.local = ""
-            }
         }
     }
     
     func fetchItems() {
         let predicate = NSPredicate(value: true)
-        let query = CKQuery(recordType: "Passeios", predicate: predicate)
+        let query = CKQuery(recordType: "Roles", predicate: predicate)
         query.sortDescriptors = [NSSortDescriptor(key: "data", ascending: false)]
         
         let queryOperation = CKQueryOperation(query: query)
@@ -101,18 +100,18 @@ class CloudKitCRUDViewModel: ObservableObject {
         
         queryOperation.recordFetchedBlock = { record in
             guard let name = record["name"] as? String else{return}
-            guard let data = record["data"] as? Date else{return}
+            guard let date = record["data"] as? String else{return}
             guard let local = record["local"] as? String else{return}
             guard let descricaoEvento = record["descricaoEvento"] as? String else{return}
-            guard let weatherContent = record["weatherContent"] as? String else{return}
-            guard let temperatura = record["temperatura"] as? Double else{return}
+            guard let temperature = record["temperatura"] as? Double else{return}
             guard let humidity = record["humidity"] as? Double else{return}
             guard let uvIndex = record["uvIndex"] as? Int else{return}
+            guard let condition = record["condition"] as? String else{return}
             guard let symbolWeather = record["symbolWeather"] as? String else{return}
-            guard let recommedationDegree = record["recommedationDegree"] as? Int else{return}
+            guard let recommedationDegree = record["recommendationDegree"] as? Int else{return}
             guard let preciptationChance = record["preciptationChance"] as? Double else{return}
             
-             fetchedPasseios.append(PasseioModel(name: name, record: record, data: data, local: local, descricaoEvento: descricaoEvento, weatherContent: weatherContent, temperatura: temperatura, humidity: humidity, uvIndex: uvIndex, symbolWeather: symbolWeather, recommendationDegree: recommedationDegree, preciptationChance: preciptationChance))
+             fetchedPasseios.append(PasseioModel(record: record, local: local, descricaoEvento: descricaoEvento, name: name, date: date, temperature: temperature, precipitationChance: preciptationChance, humidity: humidity, uvIndex: uvIndex, condition: condition, symbolWeather: symbolWeather, recommendationDegree: recommedationDegree))
             print("Fetched record: \(record.recordID.recordName)")
         }
         

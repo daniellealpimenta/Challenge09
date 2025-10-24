@@ -137,42 +137,36 @@ struct SelectActivityView: View {
         guard bestDays.indices.contains(selectedDayIndex) else { return }
         let selected = bestDays[selectedDayIndex]
         
-        let newActivity2 = crudVM(
-            crudVM.text = activityMoment.name
-            crudVM.temperatura = selected.temperature
-            crudVM.preciptationChance = selected.precipitationChance
-            crudVM.humidity = selected.humidity
-            crudVM.uvIndex = selected.uvIndex
-            crudVM.symbolWeather = selected.symbolWeather??""
-            
-        )
+       
+        crudVM.name = activityMoment.name
+        crudVM.date = selected.date
+        crudVM.local = activityMoment.local
+        crudVM.descricaoEvento = activityMoment.activityType.rawValue
+        crudVM.temperature = selected.temperature
+        crudVM.humidity = selected.humidity
+        crudVM.uvIndex = selected.uvIndex
+        crudVM.symbolWeather = selected.symbolWeather ?? "cloud.fill"
+        crudVM.condition = selected.condition
+        crudVM.recommendationDegree = selected.recommendationDegree
+        crudVM.preciptationChance = selected.precipitationChance
 
-        let newActivity = DaySelectedModel(
-            nameActivity: activityMoment.name,
-            date: selected.date,
-            temperature: selected.temperature,
-            precipitationChance: selected.precipitationChance,
-            humidity: selected.humidity,
-            uvIndex: selected.uvIndex,
-            condition: selected.condition,
-            symbolWeather: selected.symbolWeather ?? "",
-            recommendationDegree: selected.recommendationDegree
-        )
+//        let newActivity = DaySelectedModel(
+//            nameActivity: activityMoment.name,
+//            date: selected.date,
+//            temperature: selected.temperature,
+//            precipitationChance: selected.precipitationChance,
+//            humidity: selected.humidity,
+//            uvIndex: selected.uvIndex,
+//            condition: selected.condition,
+//            symbolWeather: selected.symbolWeather ?? "",
+//            recommendationDegree: selected.recommendationDegree
+//        )
 
         
         
         
         do {
-            modelContext.insert(newActivity)
-            try modelContext.save()
-
-            // Testa persistência real
-            let fetch = FetchDescriptor<DaySelectedModel>()
-            let results = try modelContext.fetch(fetch)
-            print("📊 SwiftData contém agora \(results.count) registros:")
-            for act in results {
-                print("  → \(act.nameActivity) em \(act.date)")
-            }
+            crudVM.addItem()
         } catch {
             print("❌ Erro ao salvar: \(error.localizedDescription)")
         }

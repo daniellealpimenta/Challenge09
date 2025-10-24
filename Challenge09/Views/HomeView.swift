@@ -29,32 +29,6 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            
-//            VStack{
-//                VStack{
-//                    TextField("Nome do role", text: $CRUDvm.text)
-//                        .frame(width: 280, height: 40)
-//                        .background(Color.gray)
-//                    TextField("Local: ", text: $CRUDvm.local)
-//                        .frame(width: 280, height: 40)
-//                        .background(Color.gray)
-//                    TextField("Temperatura: ",value: $CRUDvm.temperatura, format: .number)
-//                        .frame(width: 280, height: 40)
-//                        .background(Color.gray)
-//                }
-//                .padding()
-//                Button(action: {
-//                    CRUDvm.addItem()
-//                }, label: {
-//                    HStack{
-//                        Text("Adicionar")
-//                    }
-//                    .frame(width: 180, height: 40)
-//                    .background(Color.white)
-//                    .foregroundStyle(Color.black)
-//                })
-//            }
-            
             if isLoading {
                 VStack(spacing: 12) {
                     ProgressView()
@@ -141,11 +115,8 @@ struct HomeView: View {
                             }
                             .padding(.horizontal, 25)
                             VStack(spacing: 16) {
-                                ForEach(allActivities) { activity in
-                                    ActivityCard(
-                                        from: activity,
-                                        newSuggestions: false
-                                    )
+                                ForEach(CRUDvm.passeios, id:\.self) { activity in
+                                    ActivityCard(day: activity.date, activityName: activity.name, degrees: activity.recommendationDegree, precipitation: activity.precipitationChance, newSuggestions: false, condition: activity.condition, symbolName: activity.symbolWeather, humidity: Int(activity.humidity))
                                 }
                             }
                             .padding(.bottom, 30)

@@ -12,14 +12,20 @@ struct AddNewActivityView: View {
     @State private var name = ""
     @State private var maxDays = 1
     @State private var activityType: ActivityType = .walkingDog
-    @State private var newActivity: Activity = .init(name: "", maxDays: 1, activityType: .walkingDog)
+    @State private var newActivity: Activity = .init(name: "", maxDays: 1, activityType: .walkingDog, local: "")
     @State private var showSelectActivity = false
+    @State private var local: String = ""
+    @State private var descriptionEvent: String = ""
     
     var body: some View {
         NavigationStack{
             Form {
                 Section("Como deseja chamar esse rolê?") {
                     TextField("Ex: Parque com os amigos", text: $newActivity.name)
+                }
+                
+                Section("Qual será o local?") {
+                    TextField("Ex: Casa do Daniel", text: $newActivity.local)
                 }
                 
                 Section("Em até quantos dias?") {
