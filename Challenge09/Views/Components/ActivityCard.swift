@@ -13,11 +13,12 @@ struct ActivityCard: View {
     let day: String
     let activityName: String
     let degrees: Int
+    let temperature: Double
     let precipitation: Double // espera 0..1 ou 0..100 (tratado no display)
     let newSuggestions: Bool
     let condition: String?
     let symbolName: String?
-    let humidity: Int
+    let humidity: Double
 
     private var precipitationPercentString: String {
         let percent = max(0, min(100, precipitation))
@@ -53,7 +54,7 @@ struct ActivityCard: View {
                             .foregroundStyle(.white)
                             .bold()
 
-                        Text("\(degrees)°C")
+                        Text("\(temperature)°C")
                             .font(.body)
                             .foregroundStyle(.white)
                             .bold()
@@ -119,6 +120,6 @@ struct ActivityCard: View {
     ZStack {
         LinearGradient(colors: [.blue, .cyan], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
-        ActivityCard(day: "", activityName: "Piquenique", degrees: 27, precipitation: 0.05, newSuggestions: true, condition: "partlyCloudy", symbolName: "cloud.fill", humidity: 20)
+        ActivityCard(day: "", activityName: "Piquenique", degrees: 27, temperature: 32.2, precipitation: 0.05, newSuggestions: true, condition: "partlyCloudy", symbolName: "cloud.fill", humidity: 20)
     }
 }
