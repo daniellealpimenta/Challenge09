@@ -16,7 +16,6 @@ struct FoundationManager {
     
     // Pega o input e aplica as instruções que passamos para o modelo
     public func generateWeatherMessage(for input: String) async throws -> String {
-        print(input)
         // Verifica a disponibilidade no dispositivo
         guard SystemLanguageModel.default.isAvailable else {
             print("o seu sistema nao ta funcionando")

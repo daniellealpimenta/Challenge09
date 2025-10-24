@@ -114,9 +114,13 @@ struct HomeView: View {
                                 //                                }
                             }
                             .padding(.horizontal, 25)
-                            VStack(spacing: 16) {
-                                ForEach(CRUDvm.passeios, id:\.self) { activity in
-                                    ActivityCard(day: activity.date, activityName: activity.name, degrees: activity.recommendationDegree, precipitation: activity.precipitationChance, newSuggestions: false, condition: activity.condition, symbolName: activity.symbolWeather, humidity: Int(activity.humidity))
+                            ScrollView{
+                                VStack(spacing: 16) {
+                                    ForEach(CRUDvm.passeios, id:\.self) { activity in
+                                        NavigationLink(destination: DescribeActivityView(passeio: activity), label: {
+                                            ActivityCard(day: activity.date, activityName: activity.name, degrees: activity.recommendationDegree, temperature: activity.temperature, precipitation: activity.precipitationChance, newSuggestions: false, condition: activity.condition, symbolName: activity.symbolWeather, humidity: activity.humidity)
+                                        })
+                                    }
                                 }
                             }
                             .padding(.bottom, 30)
