@@ -183,7 +183,7 @@ struct SelectActivityView: View {
             onSaved?()  
             dismiss()
         }
-
+      
     }
 }
 
