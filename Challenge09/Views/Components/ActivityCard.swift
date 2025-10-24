@@ -54,7 +54,7 @@ struct ActivityCard: View {
                             .foregroundStyle(.white)
                             .bold()
 
-                        Text("\(temperature)°C")
+                        Text("\(Int(temperature))°C")
                             .font(.body)
                             .foregroundStyle(.white)
                             .bold()
@@ -103,7 +103,7 @@ struct ActivityCard: View {
                                 .foregroundStyle(.white)
                                 .bold()
 
-                            Text("\(humidity)%")
+                            Text("\(Int(humidity * 100))%")
                                 .font(.body)
                                 .foregroundStyle(.white.opacity(0.9))
                                 .bold()
