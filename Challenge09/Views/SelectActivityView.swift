@@ -63,7 +63,7 @@ struct SelectActivityView: View {
                                     Text("☀️ UV: \(day.uvIndex)")
                                     Text("💧 Umidade: \((day.humidity * 100).formatted(.number.precision(.fractionLength(0))))%")
                                     
-                                    let condicaoTraduzida = TradutorCondicaoClimatica(rawValue: day.condition.capitalized)
+                                    let condicaoTraduzida = TradutorCondicaoClimatica(rawValue: day.condition)
                                     
                                     Text("☁️ Condição: \(condicaoTraduzida?.traducao ?? day.condition.capitalized)")
                                 }
